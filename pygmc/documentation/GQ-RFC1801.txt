@@ -1,0 +1,579 @@
+http://www.gqelectronicsllc.com/download/GQ-RFC1801.txt
+***************************************************
+GQ-RFC1801
+
+GQ Geiger Counter Communication Protocol
+
+***************************************************
+Ver 1.00    Apr-2018
+
+
+Status of this Memo
+
+   This document specifies a GQ GMC Geiger Counter Communication Protocol for the
+   communication between GQ GMC Geiger Counter and a computer host via serial port, and requests discussion and suggestions for
+   improvements.  Distribution of this memo is unlimited.
+
+Copyright Notice
+
+   Copyright (C) GQ Electronics LLC (2018).  All Rights Reserved.
+
+Abstract
+
+   This document defines a GQ GMC Geiger Counter Communication Protocol
+   to support communication between GMC Geiger Counter and a computer host via serial port.  The protocol allows to send data request command from a computer host to a GQ GMC geiger counter.
+
+   This document is for GMC-500, GMC-500+, GMC-600, GMC-600+
+
+**************************
+Serial Port configuration
+**************************
+
+DEFAULT:
+
+Baud: 115200
+Data bit: 8
+Parity: None
+Stop bit: 1
+Control: None
+
+
+The serial port communication baud rate is variable. It should be one of the followings:
+
+1200,2400,4800,9600,14400,19200,28800,38400,57600,115200 BPS.  The factory default is 115200 BPS.
+
+
+**************************
+Command format
+**************************
+
+A valid command starts with ASCII '<'  and ends with ASCII '>>'. Both command and parameters are in between '<' and '>>'.
+
+Command is a ASCII string. All parameters of command are true value in hexadecimal.
+
+
+Direction: All commands are initiated from computer(HOST).
+
+
+********************************************************************************************************
+Commands
+********************************************************************************************************
+
+==============================================================================
+1. Get hardware model and version
+
+Command:  <GETVER>>
+
+Return:   ASCII chars from GQ GMC unit.
+
+	  e.g.:  GMC-600+Re 1.14
+		"GMC-600+" is the model and "Re 1.14 is the firmware revision
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+2. Get current CPM value
+
+Command:  <GETCPM>>
+
+Return:   A 32 bit unsigned integer is returned. In total 4 bytes data return from GQ GMC unit. The first byte is MSB byte data and fourth byte is LSB byte data.
+
+	  e.g.: 00 00 00 1C     the returned CPM is 28.
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+3. Turn on the GQ GMC heartbeat
+
+Note:     This command enable the GQ GMC unit to send count per second data to host every second AUTOMATICALLY.
+
+Command:  <HEARTBEAT1>>
+
+Return:   A 32 bit unsigned integer is returned every second automatically. Each data package consist of 4 bytes data from GQ GMC unit. The first byte is MSB byte data and last byte is LSB byte data.
+
+	  e.g.: 00 00 00 1C     the returned 1 second count is 28.
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+4. Turn off the GQ GMC heartbeat
+
+Command:  <HEARTBEAT0>>
+
+Return:   None (Stops the heartbit from the unit.)
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+5. Get battery voltage status
+
+Command:  <GETVOLT>>
+
+Return:   5 bytes in ASCII
+
+	  e.g. : 3.97v
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+6. Request history data from internal flash memory
+
+Command:  <SPIR[A2][A1][A0][L1][L0]>>
+
+	A2,A1,A0 are three bytes address data, from MSB to LSB.  The L1,L0 are the data length requested.  L1 is high byte of 16 bit integer and L0 is low byte.
+
+	The length normally not exceed 4096 bytes in each request.
+
+Return: The history data in raw byte array.
+
+Comment: The minimum address is 0, and maximum address value is the size of the flash memory of the GQ GMC Geiger count. Check the user manual for particular model flash size.
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+7. Get configuration data
+
+Command:  <GETCFG>>
+
+Return: The configuration data.  Total 512 bytes will be returned.
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+8. Erase all configuration data
+
+Command:  <ECFG>>
+
+Return: 0xAA
+
+Note: 	If <GETCFG>> is used after this command, you will get 512 FF bytes
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+9. Write configuration data
+
+Command:  <WCFG[A1][A0][D0]>>
+
+	A1 is the MSB of the address can only be 0x00 or 0x01
+	A0 is the MLB can be 0x00 - 0xFF
+	D0 is the data byte(hex).
+
+Note: 	Can't write a byte from 0 to 1. Changing a byte from 0 to 1 will require erasing the CFG
+	So the proper way to use <WCFG>> is to:
+	First <GETCFG>> to read 512 config bytes, modify the value from the 512 bytes, <ECFG>>, then <<WCFG>> each of the 512 byte to the config.
+
+Return: 0xAA
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+10. send a key
+
+Command:  <KEY[D0]>>
+
+	D0 is the key value from 0 to 3. It represents software key S1~S4.
+Return: none
+
+Note: Each key can be a ASCII string: <KEY0>>,<KEY1>>,<KEY2>>,<KEY3>>,
+	<KEY3>>	Power button or S4
+	<KEY2>>	S3
+	<KEY1>>	S2
+	<KEY0>> Back button or S1
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+11. get serial number
+
+Command: <GETSERIAL>>
+
+Return: serial number in 7 bytes.
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+12. Power OFF
+
+Command: <POWEROFF>>
+
+Return: none
+
+Note: 	Turns off the device
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+13. Reload/Update/Refresh Configuration
+
+Command: <CFGUPDATE>>
+
+Return: 0xAA
+
+Note: 	Usually used after writing to the CFG or after <WCFG>
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+14. Set realtime clock year
+
+command: <SETDATEYY[D0]>>
+
+	D0 is the year value in hexdecimal 0x00 is 2000 and 0x12 is 2018
+
+	example command: 3c 53 45 54 44 41 54 45 59 59 12 3e 3e
+			this will change the year to 2018.
+
+Return: 0xAA
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+15. Set realtime clock month
+
+command: <SETDATEMM[D0]>>
+
+	D0 is the month value in hexdecimal
+	0x01 is January
+
+Return: 0xAA
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+16. Set realtime clock day
+
+command: <SETDATEDD[D0]>>
+
+	D0 is the day of the month value in hexdecimal
+	3c 53 45 54 44 41 54 45 44 44 1E 3e 3e
+		this command will change the day to 30
+
+Return: 0xAA
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+17. Set realtime clock hour
+
+command: <SETTIMEHH[D0]>>
+
+	D0 is the hourvalue in hexdecimal
+
+Return: 0xAA
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+18. Set realtime clock minute
+
+command: <SETTIMEMM[D0]>>
+
+	D0 is the minute value in hexdecimal
+
+Return: 0xAA
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+19. Set realtime clock second
+
+command: <SETTIMESS[D0]>>
+
+	D0 is the second value in hexdecimal
+
+Return: 0xAA
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+20. Reset unit to factory default
+
+command: <FACTORYRESET>>
+
+
+Return: 0xAA
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+21. Reboot unit
+
+command: <REBOOT>>
+
+Return: None
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+22. Set year date and time
+
+command: <SETDATETIME[YYMMDDHHMMSS]>>
+
+Note: Combination of the SETDATE commands.
+
+Return: 0xAA
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+23. Get year date and time
+
+command: <GETDATETIME>>
+
+Return: Seven bytes data: YY MM DD HH MM SS 0xAA
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+24. Get temperature
+
+command: <GETTEMP>>
+
+NOTE: This command is not supported in the current models GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+25. Get gyroscope data
+
+command: <GETGYRO>>
+
+Return: Seven bytes gyroscope data in hexdecimal: BYTE1,BYTE2,BYTE3,BYTE4,BYTE5,BYTE6,BYTE7
+	Here: BYTE1,BYTE2 are the X position data in 16 bits value. The first byte is MSB byte data and second byte is LSB byte data.
+	      BYTE3,BYTE4 are the Y position data in 16 bits value. The first byte is MSB byte data and second byte is LSB byte data.
+	      BYTE5,BYTE6 are the Z position data in 16 bits value. The first byte is MSB byte data and second byte is LSB byte data.
+	      BYTE7 always 0xAA
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+26. Power ON
+
+Command: <POWERON>>
+
+Return: none
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+These following commands are for the wifi and server features.
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+==============================================================================
+27, Change the WiFi SSID
+
+Command: <SETSSID[Param]>>
+
+	e.g. <SETSSIDwifiowner>> will set the SSID to "wifiowner"
+
+Return: 0xAA
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+28, Change the WiFi password
+
+Command: <SETWIFIPW[Param]>>
+
+	e.g. <SETWIFIPWnowifi>> will set the password to "nowifi"
+
+Return: 0xAA
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+29, Change the Website
+
+Command: <SETWEBSITE[Param]>>
+
+Return: 0xAA
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+30, Change the URL
+
+Command: <SETURL[Param]>>
+
+Return: 0xAA
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+31, Change the User ID
+
+Command: <SETUSERID[Param]>>
+
+Return: 0xAA
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+32, Change the Counter ID
+
+Command: <SETCOUNTERID[Param]>>
+
+Return: 0xAA
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+33, Change the Period
+
+Command: <SETPERIOD[Param in hex]>>
+
+Return: 0xAA
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+34, Turns on WiFi
+
+Command: <WiFiON>>
+
+Return: 0xAA
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+35, Turns off WiFi
+
+Command: <WiFiOFF>>
+
+Return: 0xAA
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+36, AT commands
+
+Command: <AT>>
+
+Return: OK
+
+NOTE: Users can also send <AT+"anyvalidcommands">> to the GMC unit to talk to
+	the WiFi module.
+      e.g. <AT+CWLAP>> will list available access points
+      use reference AT commands for ESP8266
+      ***these commands take a few seconds 1-2 to finish
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+37, Check Wifi signal level
+
+Command: <WiFiLevel>>
+
+Return: the response from the wifi module
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+END OF WIFI COMMANDS
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+==============================================================================
+38, Turns on debugging on serial
+
+Command: <EchoON>>
+
+NOTE: This turns on an automatic output to the serial in ascii
+	e.g. when hovering to the GMC unit menu, it will output the current curser
+		->Display Mode
+	     or output a popup message to the serial
+Return: 0xAA
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+39, Turns off echo
+
+Command: <EchoOFF>>
+
+Return: 0xAA
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+40, Turns on alarm
+
+Command: <ALARM1>>
+
+Return: 0xAA
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+41, Turns off alarm
+
+Command: <ALARM0>>
+
+Return: 0xAA
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+42, Turns on speaker
+
+Command: <SPEAKER1>>
+
+Return: 0xAA
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+43, Turns off speaker
+
+Command: <SPEAKER0>>
+
+Return: 0xAA
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+44, get the current count per second
+
+Command: <GETCPS>>
+
+NOTE:
+
+Return: 4 bytes cps value in hex
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+45, get the maximum count per second since the device POWERED ON
+
+Command: <GETMAXCPS>>
+
+Return: 4 bytes cps value in hex
+
+Firmware supported:  GMC-500, GMC-500+, GMC-600, GMC-600+
+
+==============================================================================
+46, get CPM of the high dose tube
+
+Command: <GETCPMH>>
+
+Return: 4 bytes unsigned integer
+
+Firmware supported:  ******************GMC-500+
+
+==============================================================================
+47, get CPM of the low dose tube
+
+Command: <GETCPML>>
+
+Return: 4 bytes unsigned integer
+
+Firmware supported:  *****************GMC-500+,
+
+==============================================================================
+
