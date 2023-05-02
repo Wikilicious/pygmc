@@ -14,10 +14,25 @@ logger = logging.getLogger("pygmc.connection")
 
 
 class Connection:
-    def __init__(self):
+    """
+    Connection to a GMC device.
+    Either user provided parameters or a best-guess auto-connect.
+
+    Effectively a wrapper for pyserial for GMC specific tasks.
+    """
+
+    def __init__(self, timeout=5):
+        """
+        Connection to a GMC device.
+
+        Parameters
+        ----------
+        timeout : int, optional
+            serial connection timeout, seconds, by default 5
+        """
         # on windows it's usually COM3
         # on linux it's usually /dev/ttyUSB0
-        # http://www.gqelectronicsllc.com/downloads/ to look for updates? AIR-760 has no protocal docs :( 
+        # http://www.gqelectronicsllc.com/downloads/ to look for updates? AIR-760 has no protocal docs :(
         # baudrates from GQ-RFC1201 & GQ-RFC1801
         # http://www.gqelectronicsllc.com/download/GQ-RFC1201.txt
         # http://www.gqelectronicsllc.com/download/GQ-RFC1801.txt
@@ -33,26 +48,41 @@ class Connection:
             2400,
             1200,
         ]
-        self._timeout = 5  # seconds
+        logger.debug(f"Connection timeout={timeout}")
+        self._timeout = timeout  # seconds
         self._con = None
-        
-    def _test_con(self):
-        # don't use till we find a better way?
-        # UGH! Would've liked to use <GETVER>> as test but...
-        # spec GQ-RFC1201 says return is 14 bytes.
-        # spec GQ-RFC1801 doesn't specify
-        # Don't want to do dumb sleep and slow user down.
-        # Picking <GETSERIAL>> as it's specified in both specs; 7 bytes
 
+    def _test_con(self) -> bool:
+        """
+        Test connection live cavemen... Write cmd and check if there was a response.
+        Not sure at all if this is a good test.
+        No prescribed method of confirming a GMC device in specs :(
+
+        Would've liked to use <GETVER>> as test but...
+        spec GQ-RFC1201 says return is 14 bytes.
+        spec GQ-RFC1801 doesn't specify.
+        Picking <GETSERIAL>> as it's specified in both specs; 7 bytes
+
+        Returns
+        -------
+        bool
+            True: validated connection. False: unexpected response.
+        """
         self.reset_buffers()
-        serial_number = self.get_exact(b"<GETSERIAL>>", size=7)
+        try:
+            serial_number = self.get_exact(b"<GETSERIAL>>", size=7)
+        except Exception as e:
+            # Unsure of exception types.
+            logger.warning(f"{e}", exc_info=True)
+            return False
         # timeout error if wrong
-        if len(serial_number) > 0:
+        if len(serial_number) == 7:
             # Not 100% sure... no prescribed method of confirming
             # we're connected to a GMC device in specs
-            self._device_serial_number = serial_number
+            logger.debug(f"Test connection serial: {serial_number}")
             return True
         else:
+            logger.warning(f"Unexpected response: {serial_number}")
             return False
 
     def _find_correct_baudrate(self, port: str) -> bool:
@@ -73,42 +103,75 @@ class Connection:
         for br in self._baudrates:
             logger.debug(f"Checking baudrate={br} for port={port}")
             try:
+                # Note: Not sure a successful connection means the baudrate can read/write.
                 self._con = serial.Serial(port, baudrate=br, timeout=self._timeout)
                 return True
             except (OSError, serial.SerialException) as e:
                 # SerialException – In case the device can not be found or can not be configured.
                 self._con = None
-                # log error?
-                print(e)
+                logger.warning(f"{e}", exc_info=True)
         return False
-                
-    def _get_availible_usb_devices(self, regexp=None, include_links=True):
-        # include_links: include symlinks under /dev when they point to a serial port 
-        # change default to True... if user made symlinks, user can provide exact port too.
-        #
-        # Search for ports using a regular expression. Port name, description and
-        # hardware ID are searched. The function returns an iterable that returns the
-        # same tuples as comport() would do.
-        # hardwareID .hwid example ('USB VID:PID=1A86:7523 LOCATION=2-1')
-        # type [serial.tools.list_ports_linux.SysFS]
-        logger.debug(f"_get_availible_usb_devices(regexp={regexp}, include_links={include_links})")
+
+    def _get_available_usb_devices(self, regexp=None, include_links=True) -> list:
+        """
+        Get all available USB devices.
+
+        Parameters
+        ----------
+        regexp : None | str, optional
+            Search for ports using a regular expression. Port name, description and
+            hardware ID are searched.
+            hardwareID example ('USB VID:PID=1A86:7523 LOCATION=2-1')
+            Default=None, find all.
+        include_links : bool, optional
+            include symlinks under /dev when they point to a serial port, by default True
+
+        Returns
+        -------
+        list
+            available ports, type [serial.tools.list_ports_linux.SysFS]
+        """
+        logger.debug(
+            f"_get_available_usb_devices(regexp={regexp}, include_links={include_links})"
+        )
         if not regexp:
             ports = serial_list_ports.comports(include_links=include_links)
         else:
-            ports = serial_list_ports.grep(regexp=regexp, include_links=include_links)
+            # cast as list because it's a generator and I want an easy return type
+            # How many USB devices could a user possibly have?
+            ports = list(
+                serial_list_ports.grep(regexp=regexp, include_links=include_links)
+            )
         return ports
-                            
-    def _auto_connect(self):
-        ports = self._get_availible_usb_devices()
+
+    def _auto_connect(self) -> None:
+        """
+        Find available ports, attempt to connect, end on first successful connection.
+
+        Raises
+        ------
+        ConnectionError
+            Raised if exhaused all available devices or no device found.
+        """
+        ports = self._get_available_usb_devices()
         works = False
+        err_msg = ""
+        if len(ports) == 0:
+            raise ConnectionError("No devices found. (check device permissions)")
+
         for avail_port in ports:
             try:
                 # not a property, so no guarantee
                 info = avail_port.usb_info()
             except Exception as e:
                 logger.warning(f"Unable to get .usb_info() for {avail_port}")
-                logger.warning(f"{e}")
-                info = "NA"
+                logger.warning(f"{e}", exc_info=True)
+                err_msg += f"{avail_port} {e}\n"
+                continue
+
+            err_msg += (
+                f"Attempting connection to: {info}\n"  # only used if nothing worked
+            )
             logger.debug(f"USB INFO: {info}")
             port = avail_port.device  # e.g. /dev/ttyUSBO
             works = self._find_correct_baudrate(port=port)
@@ -116,17 +179,23 @@ class Connection:
                 logger.info(f"Auto-connect to port={port}")
                 logger.debug("_auto_connect() may not be what you want. Verify.")
                 break
+            else:
+                logger.warning(
+                    f"Auto-connect to port={port} was unable to validate baudrate."
+                )
         if not works:
-            msg = f"Unable to auto-connect"
-            logger.error(msg)
-            raise ConnectionError(msg)
-        
-    def connect(self, port=None, vid=None, pid=None, description=None, hardware_id=None) -> None:
+            err_msg += f"Unable to auto-connect"
+            logger.error(err_msg)
+            raise ConnectionError(err_msg)
+
+    def connect(
+        self, port=None, vid=None, pid=None, description=None, hardware_id=None
+    ) -> None:
         """
         Connect to device.
-        If all parameters are None, _auto_connect() flow is used which attempts to connect to all availible ports.
+        If all parameters are None, _auto_connect() flow is used which attempts to connect to all available ports.
         If ANY parameter is given; it's used to refine the search, any matches are considered.
-        Parameters are used as an OR search. 
+        Parameters are used as an OR search.
 
         Parameters
         ----------
@@ -158,7 +227,7 @@ class Connection:
             regexp = "|".join([x for x in inputs if x])
             logger.debug(f"serial.tools.list_ports.grep({regexp})")
             logger.debug(f"Searching devices with: {regexp}")
-            ports = self._get_availible_usb_devices(regexp=regexp)
+            ports = self._get_available_usb_devices(regexp=regexp)
             works = False
             for avail_port in ports:
                 port = avail_port.device  # e.g. /dev/ttyUSBO
@@ -169,8 +238,8 @@ class Connection:
             if not works:
                 raise ConnectionError()
         logger.info(f"Connected: {self._con}")
-            
-    def connect_exact(self, port, baudrate):
+
+    def connect_exact(self, port, baudrate) -> None:
         """
         Connect with exact user provided parameters.
         No searching port, no searching baudrate. i.e. fast.
@@ -184,12 +253,10 @@ class Connection:
         """
         logger.debug(f"Exact connect attempt: port={port} baudrate={baudrate}")
         logger.log(level=9, msg="User knows their #2")  # level lower than DEBUG=10
-        self._con = serial.Serial(
-                port=port, baudrate=baudrate, timeout=self._timeout
-            )
+        self._con = serial.Serial(port=port, baudrate=baudrate, timeout=self._timeout)
         logger.info(f"Connected: {self._con}")
-            
-    def connect_user_provided(self, connection):
+
+    def connect_user_provided(self, connection) -> None:
         """
         User does their own thing and gives a serial.Serial like class.
 
@@ -204,14 +271,23 @@ class Connection:
         self._con = connection  # good luck
         logger.info(f"Connected: {self._con}")
 
-    def close_connection(self):
+    def close_connection(self) -> None:
+        """
+        Close connection.
+        """
         if self._con is None:
             pass
         else:
             logger.info(f"Close connection: {self._con}")
             self._con.close()
 
-    def reset_buffers(self):
+    def reset_buffers(self) -> None:
+        """
+        Reset input & output buffers on pyserial connection.
+
+        reset_input_buffer(): Clear input buffer, discarding all that is in the buffer.
+        reset_output_buffer(): Clear output buffer, aborting the current output and discarding all that is in the buffer.
+        """
         # Clear input buffer, discarding all that is in the buffer.
         logger.debug("reset_input_buffer")
         self._con.reset_input_buffer()
@@ -226,7 +302,7 @@ class Connection:
         Parameters
         ----------
         cmd : bytes
-            Write command e.g. <GETVER>> 
+            Write command e.g. <GETVER>>
         """
         logger.debug(f"write='{cmd}'")
         self._con.write(cmd)
@@ -234,7 +310,7 @@ class Connection:
 
     def read(self, wait_sleep=0.3) -> bytes:
         """
-        Read all availible data... which may be incomplete. (noob/newbie method)
+        Read all available data... which may be incomplete. (noob/newbie method)
 
         Parameters
         ----------
@@ -250,7 +326,7 @@ class Connection:
         time.sleep(wait_sleep)
         # in pyserial==3.5 method added .read_all()
         # Read all bytes currently available in the buffer of the OS.
-        # BUT... not availible in pyserial==3.4
+        # BUT... not available in pyserial==3.4
         # ADDITIONALLY, https://pyserial.readthedocs.io/en/latest/index.html says latest yet refers to 3.4
         # SO... lets make this requirement 3.4 and manually implement read_all()
         if hasattr(self._con, "read_all"):
@@ -290,7 +366,7 @@ class Connection:
         Parameters
         ----------
         cmd : bytes
-            Write command e.g. <GETVER>> 
+            Write command e.g. <GETVER>>
         wait_sleep : float, optional
             Time to sleep to give device time to write, by default 0.3
 
@@ -306,14 +382,14 @@ class Connection:
 
     def get_exact(self, cmd, expected=serial.LF, size=None) -> bytes:
         """
-        Write command to device, provide expected LF or size (bytes), 
-        wait until either LF, size, or timeout is reached, 
+        Write command to device, provide expected LF or size (bytes),
+        wait until either LF, size, or timeout is reached,
         then return device response.
 
         Parameters
         ----------
         cmd : bytes
-            Write command e.g. <GETVER>> 
+            Write command e.g. <GETVER>>
         expected : bytes, optional
             Expected end char, by default serial.LF
         size : int | None, optional
