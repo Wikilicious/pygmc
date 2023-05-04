@@ -1,1 +1,1 @@
-from .device_500 import Device500
+from .device import Device
