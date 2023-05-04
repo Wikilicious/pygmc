@@ -5,7 +5,7 @@ from typing import Tuple
 import struct
 
 
-class Device500:
+class Device:
     # Note: Perhaps make a class out of the spec then inherit in device definitions?
     def __init__(self, con):
         """
