@@ -7,12 +7,14 @@ __eth__ = "0x2F2ecef407860815b315a2ecC482b4c459921974"  # Ethereum donation addr
 
 import logging
 from pygmc.connection import Connection
-from pygmc.devices import Device
+from pygmc.devices import Device, SimpleDevice
 
 logger = logging.getLogger(__name__)
 
 
-def connect(port=None, vid=None, pid=None, description=None, hardware_id=None):
+def connect(
+    port=None, vid=None, pid=None, description=None, hardware_id=None, simple=True
+):
     """
     Connect to device.
     If all parameters are None, _auto_connect() flow is used which attempts to connect to all available ports.
@@ -34,18 +36,25 @@ def connect(port=None, vid=None, pid=None, description=None, hardware_id=None):
         Device hwid, by default None
         e.g. 'USB VID:PID=1A86:7523 LOCATION=2-1'
         Use hex for vid:pid input
+    simple : bool, optional
+        Return SimpleDevice with limited methods. (default=True)
+        Methods most-likely to work with nearly all device models.
+        simple=False has more methods, but it's up to user to know which works on their device.
 
     Raises
     ------
     ConnectionError
-        _description_
+        Unable to connect to device.
     """
 
     connection = Connection()
     connection.connect(
         port=port, vid=vid, pid=pid, description=description, hardware_id=hardware_id
     )
-    device = Device(con=connection)
+    if simple:
+        device = SimpleDevice(con=connection)
+    else:
+        device = Device(con=connection)
 
     ver = device.get_version()
     msg = f"Connected device={ver}"

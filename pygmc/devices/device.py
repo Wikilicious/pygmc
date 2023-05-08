@@ -1,23 +1,26 @@
 import datetime
 import struct
 from typing import Tuple
-
+import logging
 import struct
 
 
-class Device:
-    # Note: Perhaps make a class out of the spec then inherit in device definitions?
+logger = logging.getLogger("pygmc.device")
+
+
+class SimpleDevice:
     def __init__(self, con):
         """
         A GMC device. Can be used with:
-        GMC-500, GMC-500+, GMC-600, GMC-600+
-        BUT; spec RFC1801 only lists GMC-500+ for get_cpml(), get_cpmh()
+        GMC-300, GMC-320, GMC-500, GMC-500+, GMC-600, GMC-600+
 
         Parameters
         ----------
         con : pygmc.Connection
             An connection interface to the USB device.
         """
+        # TODO: Refactor to "connection"
+        logger.debug("Initialize SimpleDevice")
         self.con = con
 
     def get_version(self) -> str:
@@ -61,6 +64,57 @@ class Device:
         result = float(result[0:3])  # e.g. float(b'4.8')
         return result
 
+    def get_cpm(self) -> int:
+        """
+        Get CPM counts-per-minute data
+        Specs don't provide how CPM is computed nor if both high/low tubes are used.
+
+        Returns
+        -------
+        int
+            Counts per minute (GMC has 2 tubes, assumed cpm accounts for both?)
+        """
+        # A 32 bit unsigned integer is returned. In total 4 bytes data return from GQ GMC unit. The first byte is MSB byte data and fourth byte is LSB byte data.
+        # e.g.: 00 00 00 1C     the returned CPM is 28. big-endian
+        cmd = b"<GETCPM>>"
+        result = self.con.get_exact(cmd, size=4)
+        count = struct.unpack(">I", result)[0]
+        return count
+
+    def get_datetime(self) -> datetime.datetime:
+        """
+        Get device datetime
+
+        Returns
+        -------
+        datetime.datetime
+            Device datetime
+        """
+        # Return: Seven bytes data: YY MM DD HH MM SS 0xAA
+        cmd = b"<GETDATETIME>>"
+        data = self.con.get_exact(cmd, size=7)
+        year = int("20{0:2d}".format(data[0]))
+        month = int("{0:2d}".format(data[1]))
+        day = int("{0:2d}".format(data[2]))
+        hour = int("{0:2d}".format(data[3]))
+        minute = int("{0:2d}".format(data[4]))
+        second = int("{0:2d}".format(data[5]))
+        return datetime.datetime(year, month, day, hour, minute, second)
+
+
+class Device(SimpleDevice):
+    def __init__(self, con):
+        """
+        A GMC device. Can be used with:
+        GMC-300, GMC-320, GMC-500, GMC-500+, GMC-600, GMC-600+
+
+        Parameters
+        ----------
+        con : pygmc.Connection
+            An connection interface to the USB device.
+        """
+        super().__init__(con)
+
     def get_gyro(self) -> Tuple[int, int, int]:
         """
         Get gyroscope data. No units specified in spec RFC1801 nor RFC1201 :(
@@ -91,23 +145,6 @@ class Device:
             Counts per second
         """
         cmd = b"<GETCPS>>"
-        result = self.con.get_exact(cmd, size=4)
-        count = struct.unpack(">I", result)[0]
-        return count
-
-    def get_cpm(self) -> int:
-        """
-        Get CPM counts-per-minute data
-        Specs don't provide how CPM is computed nor if both high/low tubes are used.
-
-        Returns
-        -------
-        int
-            Counts per minute (GMC has 2 tubes, assumed cpm accounts for both?)
-        """
-        # A 32 bit unsigned integer is returned. In total 4 bytes data return from GQ GMC unit. The first byte is MSB byte data and fourth byte is LSB byte data.
-        # e.g.: 00 00 00 1C     the returned CPM is 28. big-endian
-        cmd = b"<GETCPM>>"
         result = self.con.get_exact(cmd, size=4)
         count = struct.unpack(">I", result)[0]
         return count
@@ -145,52 +182,77 @@ class Device:
         count = struct.unpack(">I", result)[0]
         return count
 
-    def get_datetime(self) -> datetime.datetime:
+    def heartbeat_on(self) -> None:
         """
-        Get device datetime
+        Turn heartbeat ON.
+        CPS data is automatically written to the buffer every second.
+        """
+        self.con.write(b"<HEARTBEAT1>>")
+        logger.debug("Heartbeat ON")
+
+    def heartbeat_off(self) -> None:
+        """
+        Turn heartbeat OFF.
+        Stop writing data to buffer every second.
+        """
+        self.con.write(b"<HEARTBEAT0>>")
+        logger.debug("Heartbeat OFF")
+
+    def heartbeat_live(self, count=60, byte_size=4) -> int:
+        """
+        Get live CPS data, as a generator. i.e. yield (return) CPS as available.
+
+        Parameters
+        ----------
+        count : int, optional
+            How many CPS counts to return (default=60). Theoretically, 1 count = 1 second.
+            Wall-clock time can be a bit higher or lower.
+        byte_size : int, optional
+            Expected result size, by default 4.
+            GMC-500=4, GMC-320=2
 
         Returns
         -------
-        datetime.datetime
-            Device datetime
+        int
+            CPS - Counts-Per-Second
+
+        Yields
+        ------
+        Iterator[int]
+            CPS
         """
-        # Return: Seven bytes data: YY MM DD HH MM SS 0xAA
-        cmd = b"<GETDATETIME>>"
-        data = self.con.get_exact(cmd, size=7)
-        year = int("20{0:2d}".format(data[0]))
-        month = int("{0:2d}".format(data[1]))
-        day = int("{0:2d}".format(data[2]))
-        hour = int("{0:2d}".format(data[3]))
-        minute = int("{0:2d}".format(data[4]))
-        second = int("{0:2d}".format(data[5]))
-        return datetime.datetime(year, month, day, hour, minute, second)
+        self.con.reset_buffers()
+        for i in range(count):
+            raw = self.con.read_until(size=byte_size)
+            cps = struct.unpack(">I", raw)[0]
+            yield cps
+
+    def heartbeat_live_print(self, count=60, byte_size=4) -> None:
+        """
+        Print live CPS data.
+
+        Parameters
+        ----------
+        count : int, optional
+            How many CPS counts to return (default=60). Theoretically, 1 count = 1 second.
+            Wall-clock time can be a bit higher or lower.
+        byte_size : int, optional
+            Expected result size, by default 4.
+            GMC-500=4, GMC-320=2
+
+        """
+        max_ = 0
+        i = 0
+        self.con.reset_buffers()
+        for cps in self.heartbeat_live(count=count, byte_size=byte_size):
+            i += 1
+            if cps > max_:
+                max_ = cps
+            # empty leading space for terminal cursor
+            msg = f" cps={cps:<2} | max={max_:<2} | loop={i:<10,}"
+            print(msg, end="\r")  # Carriage return - update line we just printed
 
     # To-be-added soon(TM)
-    # def heartbeat(self):
-    #     df = pd.DataFrame([], columns=["datetime", "count", "unit"])
-    #     self.con.write(b"<HEARTBEAT1>>")
-    #     print("Heartbeat ON  -  Interupt Kernal to stop (CTRL-C)")
-    #     try:
-    #         while True:
-    #             time.sleep(0.19)
-    #             data = self.con._read()
-    #             if len(data) == 0:
-    #                 continue
-    #             d = datetime.datetime.now()
-    #             n = struct.unpack(">I", data)[0]
-    #             msg = "{0:<4} CPS {1}".format(n, d)
-    #             print(msg, end="\r")
-    #             # Yea... the bellow is slow but we sleeping anyways
-    #             df.loc[len(df)] = (d, n, "CPS")
-    #     except KeyboardInterrupt:
-    #         pass
-    #     except Exception as e:
-    #         print(e)
-    #     finally:
-    #         self.con.write(b"<HEARTBEAT0>>")
-    #         print("Heartbeat OFF", " " * 50)
-    #     return df
-
     # def _history(self, start_position, size):
     #     # <SPIR[A2][A1][A0][L1][L0]>>
     #     # A2,A1,A0 are three bytes address data, from MSB to LSB.
