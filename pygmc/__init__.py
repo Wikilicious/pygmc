@@ -1,20 +1,16 @@
-__version__ = "0.0.1-dev"
-__author__ = "Thomaz Lago Santana"
-__email__ = "thomazwrx@gmail.com"
+__version__ = "0.0.1"
+__author__ = "Thomaz"
 __license__ = "MIT"
-__eth__ = "0x2F2ecef407860815b315a2ecC482b4c459921974"  # Ethereum donation address
 
 
 import logging
 from pygmc.connection import Connection
-from pygmc.devices import Device, SimpleDevice
+from pygmc.devices import auto_get_device
 
 logger = logging.getLogger(__name__)
 
 
-def connect(
-    port=None, vid=None, pid=None, description=None, hardware_id=None, simple=True
-):
+def connect(port=None, vid="1A86", pid="7523", description=None, hardware_id=None):
     """
     Connect to device.
     If all parameters are None, _auto_connect() flow is used which attempts to connect to all available ports.
@@ -36,10 +32,6 @@ def connect(
         Device hwid, by default None
         e.g. 'USB VID:PID=1A86:7523 LOCATION=2-1'
         Use hex for vid:pid input
-    simple : bool, optional
-        Return SimpleDevice with limited methods. (default=True)
-        Methods most-likely to work with nearly all device models.
-        simple=False has more methods, but it's up to user to know which works on their device.
 
     Raises
     ------
@@ -51,10 +43,8 @@ def connect(
     connection.connect(
         port=port, vid=vid, pid=pid, description=description, hardware_id=hardware_id
     )
-    if simple:
-        device = SimpleDevice(con=connection)
-    else:
-        device = Device(con=connection)
+
+    device = auto_get_device(connection)
 
     ver = device.get_version()
     msg = f"Connected device={ver}"
