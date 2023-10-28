@@ -32,7 +32,7 @@ class Connection:
         """
         # on windows it's usually COM3
         # on linux it's usually /dev/ttyUSB0
-        # http://www.gqelectronicsllc.com/downloads/ to look for updates? AIR-760 has no protocal docs :(
+        # http://www.gqelectronicsllc.com/downloads/ to look for updates? AIR-760 has no protocol docs :(
         # baudrates from GQ-RFC1201 & GQ-RFC1801
         # http://www.gqelectronicsllc.com/download/GQ-RFC1201.txt
         # http://www.gqelectronicsllc.com/download/GQ-RFC1801.txt
@@ -142,6 +142,7 @@ class Connection:
             ports = list(
                 serial_list_ports.grep(regexp=regexp, include_links=include_links)
             )
+        # logger.debug(f"Ports found: {ports}")
         return ports
 
     def _auto_connect(self) -> None:
@@ -177,7 +178,6 @@ class Connection:
             works = self._find_correct_baudrate(port=port)
             if works:
                 logger.info(f"Auto-connect to port={port}")
-                logger.debug("_auto_connect() may not be what you want. Verify.")
                 break
             else:
                 logger.warning(
@@ -345,7 +345,7 @@ class Connection:
         Parameters
         ----------
         expected : bytes, optional
-            Expected end charecter, by default serial.LF
+            Expected end character, by default serial.LF
         size : None | int, optional
             Length of expected bytes, by default None
 
