@@ -9,7 +9,7 @@ setup(
     license="MIT",
     python_requires=">=3.6",
     install_requires=["pyserial>=3.4"],
-    description="Python Geiger–Müller Counter (GMC) package for GQ Electronics brand counters.",
-    long_description=open('README.md').read(),
-    long_description_content_type='text/markdown',
+    description="Python Geiger–Müller Counter (GMC) interface for GQ Electronics brand counters.",
+    long_description=open("README.md").read(),
+    long_description_content_type="text/markdown",
 )
