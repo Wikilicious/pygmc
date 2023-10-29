@@ -1,9 +1,5 @@
-import glob
-import sys
-import platform
 import time
 import logging
-import typing
 
 # pypi
 import serial
@@ -142,7 +138,7 @@ class Connection:
             ports = list(
                 serial_list_ports.grep(regexp=regexp, include_links=include_links)
             )
-        # logger.debug(f"Ports found: {ports}")
+        logger.debug(f"Ports found: {ports}")
         return ports
 
     def _auto_connect(self) -> None:
@@ -331,11 +327,14 @@ class Connection:
         # SO... lets make this requirement 3.4 and manually implement read_all()
         if hasattr(self._con, "read_all"):
             logger.debug(f"read_all")
-            return self._con.read_all()
+            result = self._con.read_all()
         else:
             # in_waiting - Return the number of bytes currently in the input buffer.
             logger.debug(f"read(in_waiting)")
-            return self._con.read(self._con.in_waiting)
+            result = self._con.read(self._con.in_waiting)
+
+        logger.debug(f"response={result}")
+        return result
 
     def read_until(self, expected=serial.LF, size=None) -> bytes:
         """
@@ -355,7 +354,9 @@ class Connection:
             Device response
         """
         logger.debug(f"read_until(expected={expected}, size={size})")
-        return self._con.read_until(expected=expected, size=size)
+        result = self._con.read_until(expected=expected, size=size)
+        logger.debug(f"response={result}")
+        return result
 
     def get(self, cmd, wait_sleep=0.3) -> bytes:
         """
@@ -378,6 +379,7 @@ class Connection:
         logger.debug(f"get(cmd={cmd}, wait_sleep={wait_sleep})")
         self.write(cmd)
         result = self.read(wait_sleep=wait_sleep)
+        logger.debug(f"response={result}")
         return result
 
     def get_exact(self, cmd, expected=serial.LF, size=None) -> bytes:
