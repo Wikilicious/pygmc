@@ -37,7 +37,7 @@ class DeviceRFC1201(SimpleDevice):
         # 	  e.g.: 00 1C     the returned CPM is 28.
 
         cmd = b"<GETCPM>>"
-        result = self.connection.get_exact(cmd, size=2)
+        result = self.connection.get_exact(cmd, expected=b"", size=2)
         count = struct.unpack(">H", result)[0]
         return count
 
@@ -57,7 +57,7 @@ class DeviceRFC1201(SimpleDevice):
         # BYTE3,BYTE4 are the Y position data in 16 bits value. The first byte is MSB byte data and second byte is LSB byte data.
         # BYTE5,BYTE6 are the Z position data in 16 bits value. The first byte is MSB byte data and second byte is LSB byte data.
         # BYTE7 always 0xAA
-        result = self.connection.get_exact(cmd, size=7)
+        result = self.connection.get_exact(cmd, expected=b"", size=7)
         x, y, z, dummy = struct.unpack(">hhhB", result)
         return x, y, z
 
@@ -72,7 +72,7 @@ class DeviceRFC1201(SimpleDevice):
 
         """
         cmd = b"<GETVOLT>>"
-        result = self.connection.get_exact(cmd, size=1)
+        result = self.connection.get_exact(cmd, expected=b"", size=1)
         # result example: b'*'.hex() -> '2a' -> int('2a', 16) -> 42 -> 4.2V
         result = int(result.hex(), 16) / 10
         return result
@@ -136,7 +136,7 @@ class DeviceRFC1201(SimpleDevice):
         """
         self.connection.reset_buffers()
         for i in range(count):
-            raw = self.connection.read_until(size=2)
+            raw = self.connection.read_until(expected=b"", size=2)
             # only first 14 bits are used, because why not complicate things
             cps = struct.unpack(">H", raw)[0] & 0x3FFF
             yield cps

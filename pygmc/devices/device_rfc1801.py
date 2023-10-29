@@ -36,7 +36,7 @@ class DeviceRFC1801(SimpleDevice):
         # The first byte is MSB byte data and fourth byte is LSB byte data.
         # e.g.: 00 00 00 1C     the returned CPM is 28. big-endian
         cmd = b"<GETCPM>>"
-        result = self.connection.get_exact(cmd, size=4)
+        result = self.connection.get_exact(cmd, expected=b"", size=4)
         count = struct.unpack(">I", result)[0]
         return count
 
@@ -51,7 +51,7 @@ class DeviceRFC1801(SimpleDevice):
             Counts per second
         """
         cmd = b"<GETCPS>>"
-        result = self.connection.get_exact(cmd, size=4)
+        result = self.connection.get_exact(cmd, expected=b"", size=4)
         count = struct.unpack(">I", result)[0]
         return count
 
@@ -70,7 +70,7 @@ class DeviceRFC1801(SimpleDevice):
         # The first byte is MSB byte data and fourth byte is LSB byte data.
         # e.g.: 00 00 00 1C     the returned CPM is 28. big-endian
         cmd = b"<GETCPMH>>"
-        result = self.connection.get_exact(cmd, size=4)
+        result = self.connection.get_exact(cmd, expected=b"", size=4)
         count = struct.unpack(">I", result)[0]
         return count
 
@@ -85,7 +85,7 @@ class DeviceRFC1801(SimpleDevice):
              Counts per minute on low dose tube (GMC has 2 tubes)
         """
         cmd = b"<GETCPML>>"
-        result = self.connection.get_exact(cmd, size=4)
+        result = self.connection.get_exact(cmd, expected=b"", size=4)
         count = struct.unpack(">I", result)[0]
         return count
 
@@ -100,7 +100,7 @@ class DeviceRFC1801(SimpleDevice):
         """
         # Return: Seven bytes data: YY MM DD HH MM SS 0xAA
         cmd = b"<GETDATETIME>>"
-        data = self.connection.get_exact(cmd, size=7)
+        data = self.connection.get_exact(cmd, expected=b"", size=7)
         year = int("20{0:2d}".format(data[0]))
         month = int("{0:2d}".format(data[1]))
         day = int("{0:2d}".format(data[2]))
@@ -127,7 +127,7 @@ class DeviceRFC1801(SimpleDevice):
         # BYTE5,BYTE6 are the Z position data in 16 bits value.
         # The first byte is MSB byte data and second byte is LSB byte data.
         # BYTE7 always 0xAA
-        result = self.connection.get_exact(cmd, size=7)
+        result = self.connection.get_exact(cmd, expected=b"", size=7)
         x, y, z, dummy = struct.unpack(">hhhB", result)
         return x, y, z
 
@@ -147,7 +147,7 @@ class DeviceRFC1801(SimpleDevice):
         """
         # Device only has resolution to tenth of a volt despite example in spec RFC1801.
         cmd = b"<GETVOLT>>"
-        result = self.connection.get_exact(cmd, size=5)
+        result = self.connection.get_exact(cmd, expected=b"", size=5)
         # result example: b'4.8v\x00'
         result = float(result[0:3])  # e.g. float(b'4.8')
         return result
@@ -187,7 +187,7 @@ class DeviceRFC1801(SimpleDevice):
         """
         self.connection.reset_buffers()
         for i in range(count):
-            raw = self.connection.read_until(size=4)
+            raw = self.connection.read_until(expected=b"", size=4)
             cps = struct.unpack(">I", raw)[0]
             yield cps
 
