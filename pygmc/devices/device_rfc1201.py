@@ -3,13 +3,13 @@ import logging
 import datetime
 import struct
 
-from .device import SimpleDevice
+from .device import BaseDevice
 
 
 logger = logging.getLogger("pygmc.devices.rfc1201")
 
 
-class DeviceRFC1201(SimpleDevice):
+class DeviceRFC1201(BaseDevice):
     def __init__(self, connection):
         """
         A GMC device. Can be used with:
@@ -21,6 +21,55 @@ class DeviceRFC1201(SimpleDevice):
             An connection interface to the USB device.
         """
         super().__init__(connection)
+
+        # Overwrites from BaseConfig & adds 1801 specific items
+        self._cfg_spec_map.update(
+            {
+                "Calibration_uSv_0": {
+                    "index": 10,
+                    "size": 4,
+                    "description": "",
+                    "type": "<f",
+                },
+                "Calibration_uSv_1": {
+                    "index": 16,
+                    "size": 4,
+                    "description": "",
+                    "type": "<f",
+                },
+                "Calibration_uSv_2": {
+                    "index": 22,
+                    "size": 4,
+                    "description": "",
+                    "type": "<f",
+                },
+                "IdleTextState": {
+                    "index": 26,
+                    "size": 1,
+                    "description": "??",
+                    "type": None,
+                },
+                "AlarmValue_uSv": {
+                    "index": 27,
+                    "size": 4,
+                    "description": "",
+                    "type": "<f",
+                },
+                "Baudrate": {
+                    "index": 57,
+                    "size": 1,
+                    # see https://www.gqelectronicsllc.com/forum/topic.asp?TOPIC_ID=4948 reply#12
+                    "description": "64=1200,160=2400,208=4800,232=9600,240=14400,244=19200,248=28800,250=38400,252=57600,254=115200",
+                    "type": None,
+                },
+                "Threshold_uSv": {
+                    "index": 65,
+                    "size": 4,
+                    "description": "",
+                    "type": "<f",
+                },
+            }
+        )
 
     def get_cpm(self) -> int:
         """
@@ -40,6 +89,28 @@ class DeviceRFC1201(SimpleDevice):
         result = self.connection.get_exact(cmd, expected=b"", size=2)
         count = struct.unpack(">H", result)[0]
         return count
+
+    def get_usv_h(self) -> float:
+        """
+        Get µSv/h
+        Uses device calibration config.
+
+        Returns
+        -------
+        float
+            µSv/h
+
+        """
+        # lazily load config... i.e. don't load it until it's needed.
+        if not self._config:
+            self.get_config()
+
+        # Not 100% sure on this...
+        # µSv/h = (CPM / CalibrationCPM_1) * Calibration_uSv_1
+        usv_h = (self.get_cpm() / self._config["CalibrationCPM_1"]) * self._config[
+            "Calibration_uSv_1"
+        ]
+        return usv_h
 
     def get_gyro(self) -> Tuple[int, int, int]:
         """
@@ -96,6 +167,21 @@ class DeviceRFC1201(SimpleDevice):
         minute = int("{0:2d}".format(data[4]))
         second = int("{0:2d}".format(data[5]))
         return datetime.datetime(year, month, day, hour, minute, second)
+
+    def get_config(self) -> dict:
+        """
+        Get device config
+
+        Returns
+        -------
+        dict
+
+        """
+        cmd = b"<GETCFG>>"
+        self.connection.reset_buffers()
+        cfg_bytes = self.connection.get_exact(cmd, expected=b"", size=256)
+        self._parse_cfg(cfg_bytes)
+        return self._config
 
     def heartbeat_on(self) -> None:
         """

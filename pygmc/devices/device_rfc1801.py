@@ -3,13 +3,13 @@ import logging
 import datetime
 import struct
 
-from .device import SimpleDevice
+from .device import BaseDevice
 
 
 logger = logging.getLogger("pygmc.devices.rfc1801")
 
 
-class DeviceRFC1801(SimpleDevice):
+class DeviceRFC1801(BaseDevice):
     def __init__(self, connection):
         """
         A GMC device. Can be used with:
@@ -21,6 +21,55 @@ class DeviceRFC1801(SimpleDevice):
             An connection interface to the USB device.
         """
         super().__init__(connection)
+
+        # Overwrites from BaseConfig & adds 1801 specific items
+        self._cfg_spec_map.update(
+            {
+                "Calibration_uSv_0": {
+                    "index": 10,
+                    "size": 4,
+                    "description": "",
+                    "type": ">f",
+                },
+                "Calibration_uSv_1": {
+                    "index": 16,
+                    "size": 4,
+                    "description": "",
+                    "type": ">f",
+                },
+                "Calibration_uSv_2": {
+                    "index": 22,
+                    "size": 4,
+                    "description": "",
+                    "type": ">f",
+                },
+                "IdleTextState": {
+                    "index": 26,
+                    "size": 1,
+                    "description": "??",
+                    "type": None,
+                },
+                "AlarmValue_uSv": {
+                    "index": 27,
+                    "size": 4,
+                    "description": "",
+                    "type": ">f",
+                },
+                "Baudrate": {
+                    "index": 57,
+                    "size": 1,
+                    # see https://www.gqelectronicsllc.com/forum/topic.asp?TOPIC_ID=4948 reply#14
+                    "description": "0=115200, 1=1200, 2=2400, 3=4800, 4=9600, 5=14400, 6=19200, 7=28800, 8=38400, 9=57600",
+                    "type": None,
+                },
+                "Threshold_uSv": {
+                    "index": 65,
+                    "size": 4,
+                    "description": "",
+                    "type": ">f",
+                },
+            }
+        )
 
     def get_cpm(self) -> int:
         """
@@ -40,10 +89,31 @@ class DeviceRFC1801(SimpleDevice):
         count = struct.unpack(">I", result)[0]
         return count
 
+    def get_usv_h(self) -> float:
+        """
+        Get µSv/h
+        Uses device calibration config.
+
+        Returns
+        -------
+        float
+            µSv/h
+
+        """
+        # lazily load config... i.e. don't load it until it's needed.
+        if not self._config:
+            self.get_config()
+
+        # Not 100% sure on this...
+        # µSv/h = (CPM / CalibrationCPM_1) * Calibration_uSv_1
+        usv_h = (self.get_cpm() / self._config["CalibrationCPM_1"]) * self._config[
+            "Calibration_uSv_1"
+        ]
+        return usv_h
+
     def get_cps(self) -> int:
         """
         Get CPS counts-per-second
-        Specs don't provide how CPS is computed
 
         Returns
         -------
@@ -51,6 +121,20 @@ class DeviceRFC1801(SimpleDevice):
             Counts per second
         """
         cmd = b"<GETCPS>>"
+        result = self.connection.get_exact(cmd, expected=b"", size=4)
+        count = struct.unpack(">I", result)[0]
+        return count
+
+    def get_max_cps(self) -> int:
+        """
+        Get the maximum counts-per-second since the device POWERED ON
+
+        Returns
+        -------
+        int
+            Max counts per second observed
+        """
+        cmd = b"<GETMAXCPS>>"
         result = self.connection.get_exact(cmd, expected=b"", size=4)
         count = struct.unpack(">I", result)[0]
         return count
@@ -212,6 +296,21 @@ class DeviceRFC1801(SimpleDevice):
             # empty leading space for terminal cursor
             msg = f" cps={cps:<2} | max={max_:<2} | loop={i:<10,}"
             print(msg, end="\r")  # Carriage return - update line we just printed
+
+    def get_config(self) -> dict:
+        """
+        Get device config
+
+        Returns
+        -------
+        dict
+
+        """
+        cmd = b"<GETCFG>>"
+        self.connection.reset_buffers()
+        cfg_bytes = self.connection.get_exact(cmd, expected=b"", size=512)
+        self._parse_cfg(cfg_bytes)
+        return self._config
 
     # To-be-added soon(TM)
     # def _history(self, start_position, size):

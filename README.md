@@ -23,7 +23,10 @@ Confirmed working on: GMC-320, GMC500
 
 
 ### Notes
-- Many un-documented features were inferred from [gq-gmc-control](https://github.com/chaim-zax/gq-gmc-control)
+- Alternative Python projects for GQ GMC:
+  - [GeigerLog](https://sourceforge.net/projects/geigerlog/)
+  - [gq-gmc-control](https://github.com/chaim-zax/gq-gmc-control)
+  - [gmc](https://gitlab.com/slippers/gmc)
 - Device website [GQ Electronics](https://gqelectronicsllc.com/) Seattle, WA
   - Not affiliated in any way.
 
