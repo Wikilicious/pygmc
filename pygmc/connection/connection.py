@@ -1,3 +1,4 @@
+import inspect
 import time
 import logging
 
@@ -47,6 +48,21 @@ class Connection:
         logger.debug(f"Connection timeout={timeout}")
         self._timeout = timeout  # seconds
         self._con = None
+
+        # pyserial has a breaking change from 3.4 to 3.5
+        # TypeError: SerialBase.read_until() got an unexpected keyword argument 'expected'
+        # 'terminator' for serial==3.4, 'expected' for serial==3.5
+        # Doing ape logic below to resolve pyserial smooth brain breaking change
+        try:
+            s = inspect.signature(serial.SerialBase.read_until)
+            params = list(s.parameters.keys())  # e.g. ['self', 'terminator', 'size']
+            self._read_until_param_name = params[
+                1
+            ]  # 'terminator' for serial==3.4, 'expected' for serial==3.5
+        except Exception as e:  # noqa
+            logger.error("Unable to resolve read_until param name")
+            logger.error(f"{e}")
+            self._read_until_param_name = "expected"  # just guess
 
     def _test_con(self) -> bool:
         """
@@ -336,15 +352,16 @@ class Connection:
         logger.debug(f"response={result}")
         return result
 
-    def read_until(self, expected=serial.LF, size=None) -> bytes:
+    def read_until(self, expected=b"", size=None) -> bytes:
         """
         Read device data until expected LF is reached or expected result size is reached.
         Waits until conditions met or timeout.
+        Some data has \n which causes reading to stop. default changed from b'\n' to b''
 
         Parameters
         ----------
         expected : bytes, optional
-            Expected end character, by default serial.LF
+            Expected end character, by default b''
         size : None | int, optional
             Length of expected bytes, by default None
 
@@ -354,7 +371,9 @@ class Connection:
             Device response
         """
         logger.debug(f"read_until(expected={expected}, size={size})")
-        result = self._con.read_until(expected=expected, size=size)
+        # This is to resolve pyserial breaking change. See __init__ above.
+        params = {self._read_until_param_name: expected, "size": size}
+        result = self._con.read_until(**params)
         logger.debug(f"response={result}")
         return result
 
