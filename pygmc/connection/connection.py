@@ -47,6 +47,7 @@ class Connection:
         ]
         logger.debug(f"Connection timeout={timeout}")
         self._timeout = timeout  # seconds
+        self._baudrate = 115200  # default
         self._con = None
 
         # pyserial has a breaking change from 3.4 to 3.5
@@ -66,7 +67,7 @@ class Connection:
 
     def _test_con(self) -> bool:
         """
-        Test connection live cavemen... Write cmd and check if there was a response.
+        Test connection cavemen style... Write cmd and check if there was a response.
         Not sure at all if this is a good test.
         No prescribed method of confirming a GMC device in specs :(
 
@@ -97,9 +98,25 @@ class Connection:
             logger.warning(f"Unexpected response: {serial_number}")
             return False
 
+    def _check_baudrate(self, con):
+        # perhaps always turn off heartbeat when connecting because that messes with the output buffer
+        con.reset_input_buffer()
+        con.reset_output_buffer()
+        cmd = b"<GETSERIAL>>"
+        con.write(cmd)
+        con.flush()
+        # This is to resolve pyserial breaking change. See __init__ above.
+        params = {self._read_until_param_name: b"", "size": 7}
+        result = con.read_until(**params)
+        if len(result) == 7:
+            logger.debug("Baudrate successfully wrote and read data.")
+            return True
+        logger.debug(f"Baudrate check returned unexpected result: {result}")
+        return False
+
     def _find_correct_baudrate(self, port: str) -> bool:
         """
-        Given a successfull port, attempt/confirm a baudrate works.
+        Given a successful port, attempt/confirm a baudrate works.
 
         Parameters
         ----------
@@ -115,16 +132,21 @@ class Connection:
         for br in self._baudrates:
             logger.debug(f"Checking baudrate={br} for port={port}")
             try:
-                # Note: Not sure a successful connection means the baudrate can read/write.
-                self._con = serial.Serial(port, baudrate=br, timeout=self._timeout)
-                return True
+                # A successful connection doesn't mean the baudrate can read/write.
+                con = serial.Serial(port, baudrate=br, timeout=1)
+                if self._check_baudrate(con):
+                    con.close()
+                    self._baudrate = br
+                    logger.debug(f"Baudrate={br} wrote and read data.")
+                    return True
+                con.close()
             except (OSError, serial.SerialException) as e:
                 # SerialException – In case the device can not be found or can not be configured.
-                self._con = None
                 logger.warning(f"{e}", exc_info=True)
         return False
 
-    def _get_available_usb_devices(self, regexp=None, include_links=True) -> list:
+    @staticmethod
+    def _get_available_usb_devices(regexp=None, include_links=True) -> list:
         """
         Get all available USB devices.
 
@@ -147,58 +169,27 @@ class Connection:
             f"_get_available_usb_devices(regexp={regexp}, include_links={include_links})"
         )
         if not regexp:
-            ports = serial_list_ports.comports(include_links=include_links)
+            _ports = serial_list_ports.comports(include_links=include_links)
         else:
             # cast as list because it's a generator and I want an easy return type
             # How many USB devices could a user possibly have?
-            ports = list(
+            _ports = list(
                 serial_list_ports.grep(regexp=regexp, include_links=include_links)
             )
-        logger.debug(f"Ports found: {ports}")
+
+        logger.debug(f"All ports found: {[(x.device, x.hwid) for x in _ports]}")
+        ports = []
+        for port in _ports:
+            hwid = port.hwid
+            # Filter out non-usb ports
+            if hasattr(hwid, "startswith") and hwid.startswith("USB"):
+                # e.g. hwid='USB VID:PID=1A86:7523 LOCATION=2-1'
+                ports.append(port)
+
+        logger.debug(
+            f"USB ports/dev-devices found: {[(x.device, x.hwid) for x in ports]}"
+        )
         return ports
-
-    def _auto_connect(self) -> None:
-        """
-        Find available ports, attempt to connect, end on first successful connection.
-
-        Raises
-        ------
-        ConnectionError
-            Raised if exhaused all available devices or no device found.
-        """
-        ports = self._get_available_usb_devices()
-        works = False
-        err_msg = ""
-        if len(ports) == 0:
-            raise ConnectionError("No devices found. (check device permissions)")
-
-        for avail_port in ports:
-            try:
-                # not a property, so no guarantee
-                info = avail_port.usb_info()
-            except Exception as e:
-                logger.warning(f"Unable to get .usb_info() for {avail_port}")
-                logger.warning(f"{e}", exc_info=True)
-                err_msg += f"{avail_port} {e}\n"
-                continue
-
-            err_msg += (
-                f"Attempting connection to: {info}\n"  # only used if nothing worked
-            )
-            logger.debug(f"USB INFO: {info}")
-            port = avail_port.device  # e.g. /dev/ttyUSBO
-            works = self._find_correct_baudrate(port=port)
-            if works:
-                logger.info(f"Auto-connect to port={port}")
-                break
-            else:
-                logger.warning(
-                    f"Auto-connect to port={port} was unable to validate baudrate."
-                )
-        if not works:
-            err_msg += f"Unable to auto-connect"
-            logger.error(err_msg)
-            raise ConnectionError(err_msg)
 
     def connect(
         self, port=None, vid=None, pid=None, description=None, hardware_id=None
@@ -233,22 +224,25 @@ class Connection:
         # ANY match, first match, becomes the device
         inputs = [port, vid, pid, description, hardware_id]
         if not any(v is not None for v in inputs):
-            logger.debug("Using auto_connect...")
-            self._auto_connect()
+            ports = self._get_available_usb_devices()
         else:
             regexp = "|".join([x for x in inputs if x])
             logger.debug(f"serial.tools.list_ports.grep({regexp})")
-            logger.debug(f"Searching devices with: {regexp}")
             ports = self._get_available_usb_devices(regexp=regexp)
-            works = False
-            for avail_port in ports:
-                port = avail_port.device  # e.g. /dev/ttyUSBO
-                works = self._find_correct_baudrate(port=port)
-                if works:
-                    logger.info(f"Connected to {self._con.port}")
-                    break
-            if not works:
-                raise ConnectionError()
+
+        works = False
+        for avail_port in ports:
+            port = avail_port.device  # e.g. /dev/ttyUSBO
+            logger.debug(port)
+            works = self._find_correct_baudrate(port=port)
+            if works:
+                self._con = serial.Serial(
+                    port=port, baudrate=self._baudrate, timeout=self._timeout
+                )
+                logger.info(f"Connected to {self._con.port}")
+                break
+        if not works:
+            raise ConnectionError()
         logger.info(f"Connected: {self._con}")
 
     def connect_exact(self, port, baudrate) -> None:
@@ -401,7 +395,7 @@ class Connection:
         logger.debug(f"response={result}")
         return result
 
-    def get_exact(self, cmd, expected=serial.LF, size=None) -> bytes:
+    def get_exact(self, cmd, expected=b"", size=None) -> bytes:
         """
         Write command to device, provide expected LF or size (bytes),
         wait until either LF, size, or timeout is reached,
@@ -412,7 +406,7 @@ class Connection:
         cmd : bytes
             Write command e.g. <GETVER>>
         expected : bytes, optional
-            Expected end char, by default serial.LF
+            Expected end char, by default b''
         size : int | None, optional
             Expected response size, by default None
 
