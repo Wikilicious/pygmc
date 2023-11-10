@@ -1,3 +1,7 @@
 black==23.3
 flake8
+invoke
+pytest
+pytest-cov
+ipytest
 bumpversion
