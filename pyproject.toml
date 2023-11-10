@@ -5,7 +5,7 @@ exclude = '''
     \.git
   | \.venv
   | \.tox
-  | \build
-  | \dist
+  | build
+  | dist
 )/
 '''
