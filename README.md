@@ -1,5 +1,12 @@
 # PYGMC
-Python Geiger–Müller Counter (GMC) interface for GQ Electronics brand.  
+Python Geiger–Müller Counter (GMC) USB interface for GQ Electronics brand & others soon™.  
+
+### Installation 
+```shell
+pip install pygmc
+```
+[PyGMC on PYPI](https://pypi.org/project/pygmc/)
+
 
 ### Example Usage
 ```pycon
@@ -15,9 +22,16 @@ print(cpm)
 ```
 
 ### Devices
-Devices: GMC-280, GMC-300, GMC-320, GMC-500, GMC-600 (and plus+ variants)  
-Confirmed working on: GMC-320, GMC500
+- GMC-300S (confirmed works)
+- GMC-300E Plus / GMC-300E+
+- GMC-320 Plus / GMC-320+ (confirmed works)
+- GMC-320S
+- GMC-500
+- GMC-500 Plus / GMC-500+ (confirmed works)
 
+Any GQ GMC device following communication protocol RFC1201 or RFC1801.
+
+![](https://www.gqelectronicsllc.com/comersus/store/catalog/300s%20main.jpg)
 ![](https://www.gqelectronicsllc.com/comersus/store/catalog/GMC-320-Plus_350.png)
 ![](https://www.gqelectronicsllc.com/comersus/store/catalog/GMC-500HV_350.png)
 
