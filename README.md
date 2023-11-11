@@ -1,11 +1,15 @@
-# PYGMC
-Python Geiger–Müller Counter (GMC) USB interface for GQ Electronics brand & others soon™.  
+# PyGMC
+[![](https://img.shields.io/pypi/v/pygmc.svg)](https://pypi.org/project/pygmc/)
+[![](https://github.com/Wikilicious/pygmc/workflows/Python%20application/badge.svg)](https://github.com/Wikilicious/pygmc/actions)
+[![](https://img.shields.io/pypi/l/pygmc.svg)](https://github.com/Wikilicious/pygmc/blob/master/LICENSE)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/pygmc)](https://pypi.org/project/pygmc/)
+
+Python Geiger–Müller Counter (GMC) USB serial interface for GQ Electronics brand.  
 
 ### Installation 
 ```shell
 pip install pygmc
 ```
-[PyGMC on PYPI](https://pypi.org/project/pygmc/)
 
 
 ### Example Usage
