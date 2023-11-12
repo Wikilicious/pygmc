@@ -1,11 +1,10 @@
 import inspect
-import time
 import logging
+import time
 
 # pypi
 import serial
 from serial.tools import list_ports as serial_list_ports
-
 
 logger = logging.getLogger("pygmc.connection")
 
@@ -61,8 +60,7 @@ class Connection:
                 1
             ]  # 'terminator' for serial==3.4, 'expected' for serial==3.5
         except Exception as e:  # noqa
-            logger.error("Unable to resolve read_until param name")
-            logger.error(f"{e}")
+            logger.exception("Unable to resolve read_until param name")
             self._read_until_param_name = "expected"  # just guess
 
     def _test_con(self) -> bool:
@@ -336,11 +334,11 @@ class Connection:
         # ADDITIONALLY, https://pyserial.readthedocs.io/en/latest/index.html says latest yet refers to 3.4
         # SO... lets make this requirement 3.4 and manually implement read_all()
         if hasattr(self._con, "read_all"):
-            logger.debug(f"read_all")
+            logger.debug("read_all")
             result = self._con.read_all()
         else:
             # in_waiting - Return the number of bytes currently in the input buffer.
-            logger.debug(f"read(in_waiting)")
+            logger.debug("read(in_waiting)")
             result = self._con.read(self._con.in_waiting)
 
         logger.debug(f"response={result}")

@@ -7,8 +7,8 @@ import datetime
 import pytest
 
 from pygmc import devices
-from .mocks import MockConnection
 
+from .mocks import MockConnection
 
 cmd_response_map = {
     b"<GETVER>>": b"GMC-300SRe 1.14",
