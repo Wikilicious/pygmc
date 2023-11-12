@@ -4,7 +4,6 @@ from .device import BaseDevice
 from .device_rfc1201 import DeviceRFC1201
 from .device_rfc1801 import DeviceRFC1801
 
-
 logger = logging.getLogger("pygmc.device")
 
 device_map = {
@@ -36,7 +35,7 @@ def auto_get_device(connection):
 
     if base_version not in device_map:
         logger.warning(f"Unable to auto assign device to Device={result}")
-        logger.warning(f"Assuming newer device. Manually specify device if incorrect.")
+        logger.warning("Assuming newer device. Manually specify device if incorrect.")
         return DeviceRFC1801(connection)
 
     return device_map[base_version](connection)

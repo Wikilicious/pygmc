@@ -1,7 +1,6 @@
 import logging
 import struct
 
-
 logger = logging.getLogger("pygmc.device")
 
 
