@@ -16,14 +16,17 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Physics",
     "Topic :: Hardware :: Universal Serial Bus (USB)",
 ]
 
+
 [project.urls]
 homepage = "https://github.com/Wikilicious/pygmc"
-repository = "https://github.com/Wikilicious/pygmc"
+source = "https://github.com/Wikilicious/pygmc"
+tracker = "https://github.com/Wikilicious/pygmc/issues"
 
 
 [tool.black]
