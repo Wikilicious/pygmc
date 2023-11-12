@@ -1,7 +1,9 @@
 black==23.3
+ruff
 flake8
 invoke
 pytest
 pytest-cov
 ipytest
 bumpversion
+build

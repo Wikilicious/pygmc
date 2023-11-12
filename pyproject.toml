@@ -1,3 +1,28 @@
+[project]
+name = "pygmc"
+version = "0.3.0"
+authors = [
+    {name = "Thomaz"},
+]
+description = "Python package for Geiger–Müller Counter (GMC)"
+license = {file = "LICENSE"}
+requires-python = ">=3.7"
+dependencies = ["pyserial>=3.4"]
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+
+[project.urls]
+homepage = "https://github.com/Wikilicious/pygmc"
+repository = "https://github.com/Wikilicious/pygmc"
+
+
 [tool.black]
 line-length = 90
 exclude = '''
@@ -5,7 +30,88 @@ exclude = '''
     \.git
   | \.venv
   | \.tox
+  | \.pytest_cache
+  | \.idea
   | build
   | dist
 )/
 '''
+
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    ".venv",
+]
+
+
+line-length = 90
+indent-width = 4
+
+# Assume Python 3.11
+target-version = "py311"
+
+
+[tool.ruff.lint]
+# B=bugbear - suggestions
+# D=pycodestyle - Documentation - todo future date
+# E=pycodestyle
+# F=Pyflakes
+# I=isort linter
+# N=pep8-naming linter
+# PLE=Pylint
+# S=flake8-bandit
+# TRY=tryceratops (exception handling linter)
+# UP=pyupgrade - todo future date
+# W=pycodestyle
+select = ["E", "F", "I", "N", "PLE", "S", "TRY", "W"]
+ignore = [
+    # line-length - ignoring because if black cant change it, perhaps it is more readable
+    "E501",
+]
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = ["B"]
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/*" = ["S101"]
