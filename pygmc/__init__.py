@@ -4,6 +4,7 @@ __license__ = "MIT"
 
 
 import logging
+
 from pygmc.connection import Connection
 from pygmc.devices import auto_get_device
 

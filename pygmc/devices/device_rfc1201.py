@@ -1,10 +1,9 @@
-from typing import Tuple
-import logging
 import datetime
+import logging
 import struct
+from typing import Tuple
 
 from .device import BaseDevice
-
 
 logger = logging.getLogger("pygmc.devices.rfc1201")
 
