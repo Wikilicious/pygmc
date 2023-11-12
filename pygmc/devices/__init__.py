@@ -12,6 +12,9 @@ device_map = {
     "GMC-320": DeviceRFC1201,
     "GMC-500": DeviceRFC1801,
     "GMC-600": DeviceRFC1801,
+    # seemed like bigger number would use newer rfc spec until GMC-800
+    # listed as RFC1201 in https://www.gqelectronicsllc.com/GMC-800UserGuide.pdf
+    "GMC-800": DeviceRFC1201,
 }
 
 
