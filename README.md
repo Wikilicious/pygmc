@@ -1,10 +1,10 @@
 # PyGMC
 [![](https://img.shields.io/pypi/v/pygmc.svg)](https://pypi.org/project/pygmc/)
 [![](https://github.com/Wikilicious/pygmc/workflows/Python%20application/badge.svg)](https://github.com/Wikilicious/pygmc/actions)
-[![](https://img.shields.io/pypi/l/pygmc.svg)](https://github.com/Wikilicious/pygmc/blob/master/LICENSE)
+[![GitHub](https://img.shields.io/github/license/Wikilicious/pygmc)](https://github.com/Wikilicious/pygmc/blob/master/LICENSE)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/pygmc)](https://pypi.org/project/pygmc/)
 
-Python Geiger–Müller Counter (GMC) USB serial interface for GQ Electronics brand.  
+Python package for Geiger–Müller Counter (GMC) - communicate via USB serial interface.  
 
 ### Installation 
 ```shell
@@ -26,14 +26,20 @@ print(cpm)
 ```
 
 ### Devices
-- GMC-300S (confirmed works)
-- GMC-300E Plus / GMC-300E+
-- GMC-320 Plus / GMC-320+ (confirmed works)
-- GMC-320S
-- GMC-500
-- GMC-500 Plus / GMC-500+ (confirmed works)
+| Device | Brand | Notes |
+| ------ | ----- | ----- |
+| GMC-300S ✔️ | GQ Electronics | Required lower baudrate to work |
+| GMC-300E+ / GMC-300E Plus | GQ Electronics |
+| GMC-320+ / GMC-320 Plus ✔️ |GQ Electronics | Works smoothly |
+| GMC-320S | GQ Electronics |
+| GMC-500 | GQ Electronics |
+| GMC-500+ / GMC-500 Plus ✔️ | GQ Electronics | Works smoothly |
+| GMC-600 | GQ Electronics |
+| GMC-600+ / GMC-600 Plus ✔️ | GQ Electronics |
+| GMC-800 | GQ Electronics |
 
-Any GQ GMC device following communication protocol RFC1201 or RFC1801.
+(✔️=physically confirmed works)  
+Theoretically, any GQ GMC device following communication protocol RFC1201 or RFC1801 should work (e.g. the old GMC-280 )
 
 ![](https://www.gqelectronicsllc.com/comersus/store/catalog/300s%20main.jpg)
 ![](https://www.gqelectronicsllc.com/comersus/store/catalog/GMC-320-Plus_350.png)
