@@ -35,7 +35,7 @@ print(cpm)
 | GMC-500 | GQ Electronics |
 | GMC-500+ / GMC-500 Plus ✔️ | GQ Electronics | Works smoothly |
 | GMC-600 | GQ Electronics |
-| GMC-600+ / GMC-600 Plus ✔️ | GQ Electronics |
+| GMC-600+ / GMC-600 Plus | GQ Electronics |
 | GMC-800 | GQ Electronics |
 
 (✔️=physically confirmed works)  
