@@ -9,6 +9,7 @@ license = {file = "LICENSE"}
 requires-python = ">=3.7"
 dependencies = ["pyserial>=3.4"]
 readme = "README.md"
+# Valid classifiers: https://pypi.org/classifiers/
 classifiers = [
     "Programming Language :: Python",
     "Programming Language :: Python :: 3.7",
@@ -19,7 +20,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Physics",
-    "Topic :: Hardware :: Universal Serial Bus (USB)",
+    "Topic :: System :: Hardware :: Universal Serial Bus (USB)",
 ]
 
 
