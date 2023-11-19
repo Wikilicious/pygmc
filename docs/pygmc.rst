@@ -1,5 +1,5 @@
-pygmc package
-=============
+pygmc
+=====
 
 Subpackages
 -----------
