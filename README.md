@@ -1,6 +1,6 @@
 # PyGMC
 [![](https://img.shields.io/pypi/v/pygmc.svg)](https://pypi.org/project/pygmc/)
-[![Read the Docs](https://img.shields.io/readthedocs/pygmc)](https://img.shields.io/readthedocs/pygmc)
+[![Read the Docs](https://img.shields.io/readthedocs/pygmc)](https://pygmc.readthedocs.io/)
 [![](https://github.com/Wikilicious/pygmc/workflows/Python%20application/badge.svg)](https://github.com/Wikilicious/pygmc/actions)
 [![GitHub](https://img.shields.io/github/license/Wikilicious/pygmc)](https://github.com/Wikilicious/pygmc/blob/master/LICENSE)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/pygmc)](https://pypi.org/project/pygmc/)
