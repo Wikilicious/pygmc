@@ -1,4 +1,4 @@
-__version__ = "0.5.2"
+__version__ = "0.5.3"
 __author__ = "Thomaz"
 __license__ = "MIT"
 
@@ -11,18 +11,30 @@ from pygmc.devices import auto_get_device
 logger = logging.getLogger(__name__)
 
 
-def connect(port=None, vid="1A86", pid="7523", description=None, hardware_id=None):
+def connect(
+    port=None,
+    baudrate=None,
+    vid=None,
+    pid=None,
+    description=None,
+    hardware_id=None,
+):
     """
     Connect to device.
-    If all parameters are None, _auto_connect() flow is used which attempts to connect to all available ports.
+    If all parameters are None, _auto_connect() flow is used which attempts to connect
+    to all available ports.
     If ANY parameter is given; it's used to refine the search, any matches are considered.
     Parameters are used as an OR search.
 
     Parameters
     ----------
     port : str | None, optional
-        Device port, by default None
-        e.g. 'USB0' or 'COM3' or '/dev/ttyUSB*'
+        Exact port (device dev path / com port) e.g. '/dev/ttyUSB0'
+        If port is specified, the following kwargs are ignored: vid, pid, description,
+        hardware_id.
+    baudrate: int | None
+        Device baudrate. Leave None to auto-detect baudrate. Only applicable when port
+        is specified.
     vid : str | None, optional
         Device vendor ID as hex, by default None
     pid : str | None, optional
@@ -42,7 +54,12 @@ def connect(port=None, vid="1A86", pid="7523", description=None, hardware_id=Non
 
     connection = Connection()
     connection.connect(
-        port=port, vid=vid, pid=pid, description=description, hardware_id=hardware_id
+        port=port,
+        baudrate=baudrate,
+        vid=vid,
+        pid=pid,
+        description=description,
+        hardware_id=hardware_id,
     )
 
     device = auto_get_device(connection)

@@ -1,6 +1,6 @@
 [project]
 name = "pygmc"
-version = "0.5.2"
+version = "0.5.3"
 authors = [
     {name = "Thomaz"},
 ]
@@ -26,6 +26,7 @@ classifiers = [
 
 [project.urls]
 homepage = "https://github.com/Wikilicious/pygmc"
+documentation = "https://pygmc.readthedocs.io/"
 source = "https://github.com/Wikilicious/pygmc"
 tracker = "https://github.com/Wikilicious/pygmc/issues"
 
@@ -96,6 +97,8 @@ select = ["E", "F", "I", "N", "PLE", "S", "TRY", "W"]
 ignore = [
     # line-length - ignoring because if black cant change it, perhaps it is more readable
     "E501",
+    # Avoid specifying long messages outside the exception class
+    "TRY003",
 ]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
