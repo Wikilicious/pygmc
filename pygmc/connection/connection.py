@@ -190,19 +190,30 @@ class Connection:
         return ports
 
     def connect(
-        self, port=None, vid=None, pid=None, description=None, hardware_id=None
+        self,
+        port=None,
+        baudrate=None,
+        vid=None,
+        pid=None,
+        description=None,
+        hardware_id=None,
     ) -> None:
         """
         Connect to device.
-        If all parameters are None, _auto_connect() flow is used which attempts to connect to all available ports.
+        If all parameters are None, _auto_connect() flow is used which attempts to connect
+        to all available ports.
         If ANY parameter is given; it's used to refine the search, any matches are considered.
         Parameters are used as an OR search.
 
         Parameters
         ----------
         port : str | None, optional
-            Device port, by default None
-            e.g. 'USB0' or 'COM3' or '/dev/ttyUSB*'
+            Exact port (device dev path / com port) e.g. '/dev/ttyUSB0'
+            If port is specified, the following kwargs are ignored: vid, pid, description,
+            hardware_id.
+        baudrate: int | None
+            Device baudrate. Leave None to auto-detect baudrate. Only applicable when port
+            is specified.
         vid : str | None, optional
             Device vendor ID as hex, by default None
         pid : str | None, optional
@@ -219,29 +230,43 @@ class Connection:
         ConnectionError
             _description_
         """
-        # ANY match, first match, becomes the device
-        inputs = [port, vid, pid, description, hardware_id]
-        if not any(v is not None for v in inputs):
-            ports = self._get_available_usb_devices()
-        else:
-            regexp = "|".join([x for x in inputs if x])
-            logger.debug(f"serial.tools.list_ports.grep({regexp})")
-            ports = self._get_available_usb_devices(regexp=regexp)
-
-        works = False
-        for avail_port in ports:
-            port = avail_port.device  # e.g. /dev/ttyUSBO
-            logger.debug(port)
+        if port and baudrate:
+            self.connect_exact(port, baudrate)
+        elif port:
             works = self._find_correct_baudrate(port=port)
             if works:
                 self._con = serial.Serial(
                     port=port, baudrate=self._baudrate, timeout=self._timeout
                 )
                 logger.info(f"Connected to {self._con.port}")
-                break
-        if not works:
-            raise ConnectionError()
-        logger.info(f"Connected: {self._con}")
+            else:
+                raise ConnectionError(f"Unable to connect to: {port}")
+
+        else:
+            # ANY match, first match, becomes the device
+            inputs = [vid, pid, description, hardware_id]
+            if not any(v is not None for v in inputs):
+                # no user info to go on... let's see what we can do...
+                ports = self._get_available_usb_devices()
+            else:
+                regexp = "|".join([x for x in inputs if x])
+                logger.debug(f"serial.tools.list_ports.grep({regexp})")
+                ports = self._get_available_usb_devices(regexp=regexp)
+
+            works = False
+            for avail_port in ports:
+                port = avail_port.device  # e.g. /dev/ttyUSBO
+                logger.debug(port)
+                works = self._find_correct_baudrate(port=port)
+                if works:
+                    self._con = serial.Serial(
+                        port=port, baudrate=self._baudrate, timeout=self._timeout
+                    )
+                    logger.info(f"Connected to {self._con.port}")
+                    break
+            if not works:
+                raise ConnectionError()
+            logger.info(f"Connected: {self._con}")
 
     def connect_exact(self, port, baudrate) -> None:
         """

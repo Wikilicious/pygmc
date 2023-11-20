@@ -14,9 +14,6 @@ print(f"{cpm=}")
 voltage = gc.get_voltage()
 print(f"{voltage=}")
 
-voltage = gc.get_voltage()
-print(f"{voltage=}")
-
 gyro = gc.get_gyro()
 print(f"{gyro=}")
 
