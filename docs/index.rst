@@ -3,6 +3,11 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+
+.. meta::
+   :google-site-verification: 5IzQYkf392uzYxd2VkHCwupUJF8F_HlGag1_f4wILY0
+
+
 PyGMC Documentation
 ===================
 
