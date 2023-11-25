@@ -1,3 +1,8 @@
+"""
+Represent a USB connection to a GMC.
+
+This is the communication class.
+"""
 import inspect
 import logging
 import time
@@ -11,15 +16,15 @@ logger = logging.getLogger("pygmc.connection")
 
 class Connection:
     """
-    Connection to a GMC device.
-    Either user provided parameters or a best-guess auto-connect.
+    Represent a connection to a GMC device.
 
+    Either user provided parameters or a best-guess auto-connect.
     Effectively a wrapper for pyserial for GMC specific tasks.
     """
 
     def __init__(self, timeout=5):
         """
-        Connection to a GMC device.
+        Represent a connection to a GMC device.
 
         Parameters
         ----------
@@ -66,6 +71,7 @@ class Connection:
     def _test_con(self) -> bool:
         """
         Test connection cavemen style... Write cmd and check if there was a response.
+
         Not sure at all if this is a good test.
         No prescribed method of confirming a GMC device in specs :(
 
@@ -200,9 +206,10 @@ class Connection:
     ) -> None:
         """
         Connect to device.
-        If all parameters are None, _auto_connect() flow is used which attempts to connect
-        to all available ports.
-        If ANY parameter is given; it's used to refine the search, any matches are considered.
+
+        If all parameters are None, _auto_connect() flow is used which attempts to
+        connect to all available ports.
+        If ANY parameter is given; it refines the search, any matches are considered.
         Parameters are used as an OR search.
 
         Parameters
@@ -271,6 +278,7 @@ class Connection:
     def connect_exact(self, port, baudrate) -> None:
         """
         Connect with exact user provided parameters.
+
         No searching port, no searching baudrate. i.e. fast.
 
         Parameters
@@ -301,9 +309,7 @@ class Connection:
         logger.info(f"Connected: {self._con}")
 
     def close_connection(self) -> None:
-        """
-        Close connection.
-        """
+        """Close connection."""
         if self._con is None:
             pass
         else:
@@ -339,7 +345,9 @@ class Connection:
 
     def read(self, wait_sleep=0.3) -> bytes:
         """
-        Read all available data... which may be incomplete. (noob/newbie method)
+        Read all available data.
+
+        Which may be incomplete. (noob/newbie method)
 
         Parameters
         ----------
@@ -370,10 +378,12 @@ class Connection:
         return result
 
     def read_until(self, expected=b"", size=None) -> bytes:
-        """
+        r"""
         Read device data until expected LF is reached or expected result size is reached.
+
         Waits until conditions met or timeout.
-        Some data has \n which causes reading to stop. default changed from b'\n' to b''
+        Some data has '\n' which causes reading to stop.
+        default changed from b'\n' to b''
 
         Parameters
         ----------
@@ -397,6 +407,7 @@ class Connection:
     def get(self, cmd, wait_sleep=0.3) -> bytes:
         """
         Write command to device and get response.
+
         Only use in development/learning environment.
         May give incomplete/empty response if device is busy.
 
@@ -420,6 +431,8 @@ class Connection:
 
     def get_exact(self, cmd, expected=b"", size=None) -> bytes:
         """
+        Write and read exact.
+
         Write command to device, provide expected LF or size (bytes),
         wait until either LF, size, or timeout is reached,
         then return device response.

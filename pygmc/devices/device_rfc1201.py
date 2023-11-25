@@ -11,7 +11,9 @@ logger = logging.getLogger("pygmc.devices.rfc1201")
 class DeviceRFC1201(BaseDevice):
     def __init__(self, connection):
         """
-        A GMC device. Can be used with:
+        Represent a GMC device.
+
+        Can be used with:
         GMC-280, GMC-300, GMC-320
 
         Parameters
@@ -72,7 +74,7 @@ class DeviceRFC1201(BaseDevice):
 
     def get_cpm(self) -> int:
         """
-        Get CPM counts-per-minute data
+        Get CPM counts-per-minute data.
 
         Returns
         -------
@@ -91,7 +93,8 @@ class DeviceRFC1201(BaseDevice):
 
     def get_usv_h(self) -> float:
         """
-        Get µSv/h
+        Get µSv/h.
+
         Uses device calibration config.
 
         Returns
@@ -114,6 +117,7 @@ class DeviceRFC1201(BaseDevice):
     def get_gyro(self) -> Tuple[int, int, int]:
         """
         Get gyroscope data.
+
         No units specified in spec RFC1801 nor RFC1201 :(
 
         Returns
@@ -137,7 +141,7 @@ class DeviceRFC1201(BaseDevice):
 
     def get_voltage(self) -> float:
         """
-        Get device voltage
+        Get device voltage.
 
         Returns
         -------
@@ -153,7 +157,7 @@ class DeviceRFC1201(BaseDevice):
 
     def get_datetime(self) -> datetime.datetime:
         """
-        Get device datetime
+        Get device datetime.
 
         Returns
         -------
@@ -173,7 +177,7 @@ class DeviceRFC1201(BaseDevice):
 
     def get_config(self) -> dict:
         """
-        Get device config
+        Get device config.
 
         Returns
         -------
@@ -185,6 +189,23 @@ class DeviceRFC1201(BaseDevice):
         cfg_bytes = self.connection.get_exact(cmd, expected=b"", size=256)
         self._parse_cfg(cfg_bytes)
         return self._config
+
+    def get_temp(self) -> float:
+        """
+        Get device temperature in Celsius.
+
+        Returns
+        -------
+        float
+            Device temperature is celsius.
+
+        """
+        result = self.connection.get_exact(b"<GETTEMP>>", size=4)
+        sign = 1
+        if result[2] != 0:
+            sign = -1
+        temp = sign * float("{}.{}".format(result[0], result[1]))
+        return temp
 
     def heartbeat_live(self, count=60) -> Generator[int, None, None]:
         """
@@ -229,7 +250,95 @@ class DeviceRFC1201(BaseDevice):
             i += 1
             if cps > max_:
                 max_ = cps
+            # Yea, I'd rather use f-string... just trying to make it compatible with
+            # older Python versions
             # empty leading space for terminal cursor
-            msg = f" cps={cps:<2} | max={max_:<2} | loop={i:<10,}"
+            msg = " cps={cps:<2} | max={max_:<2} | loop={i:<10,}".format(
+                cps=cps, max_=max_, i=i
+            )
             print(msg, end="\r")  # Carriage return - update line we just printed
         print("", end="\n")  # empty print to move carriage return to next line
+
+    def power_off(self) -> None:
+        """Power OFF device."""
+        cmd = b"<POWEROFF>>"
+        self.connection.reset_buffers()
+        self.connection.write(cmd)
+
+    def power_on(self) -> None:
+        """Power ON device."""
+        cmd = b"<POWERON>>"
+        self.connection.reset_buffers()
+        self.connection.write(cmd)
+
+    def send_key(self, key_number) -> None:
+        """
+        Send key press signal to device.
+
+        Note the power button acts as menu clicks and does not power on/off.
+
+        Parameters
+        ----------
+        key_number: int
+            Each number represents a key-press.
+            key=0 -> S1 (back button)
+            key=1 -> S2 (down button)
+            key=2 -> S3 (up button)
+            key=3 -> S4 (power button)
+
+        """
+        if key_number not in (0, 1, 2, 3):
+            raise ValueError("key must be in (0, 1, 2, 3)")
+
+        cmd = "<KEY{}>>".format(key_number).encode()
+        self.connection.write(cmd)
+
+    def set_datetime(self, datetime_=None) -> None:
+        """
+        Set datetime on device.
+
+        Parameters
+        ----------
+        datetime_: None | datetime.datetime
+            Datetime to set. Default=None uses current time on computer i.e.
+            datetime.datetime.now()
+
+        Raises
+        ------
+        ValueError
+            Year value earlier than 2000.
+
+        RuntimeError
+            Unexpected response from device.
+
+        """
+        if not datetime_:
+            datetime_ = datetime.datetime.now()
+
+        if datetime_.year < 2000:
+            # welp... device has year hardcoded 20xx
+            raise ValueError("Device can't set year earlier than 2000")
+
+        dt_cmd = struct.pack(
+            ">BBBBBB",
+            datetime_.year - 2000,
+            datetime_.month,
+            datetime_.day,
+            datetime_.hour,
+            datetime_.minute,
+            datetime_.second,
+        )
+        cmd = b"<SETDATETIME" + dt_cmd + b">>"
+        self.connection.reset_buffers()
+        result = self.connection.get_exact(cmd, expected=b"", size=1)
+        if not result == b"\xaa":
+            raise RuntimeError("Unexpected response: {}".format(result))
+
+    def reboot(self) -> None:
+        """
+        Reboot device.
+
+        Note: Different from power off-on as it changes display to default.
+        """
+        cmd = b"<REBOOT>>"
+        self.connection.write(cmd)

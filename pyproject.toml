@@ -1,6 +1,6 @@
 [project]
 name = "pygmc"
-version = "0.5.4"
+version = "0.6.0"
 authors = [
     {name = "Thomaz"},
 ]
@@ -83,7 +83,7 @@ target-version = "py311"
 
 [tool.ruff.lint]
 # B=bugbear - suggestions
-# D=pycodestyle - Documentation - todo future date
+# D=pycodestyle - Documentation - todo
 # E=pycodestyle
 # F=Pyflakes
 # I=isort linter
@@ -99,6 +99,19 @@ ignore = [
     "E501",
     # Avoid specifying long messages outside the exception class
     "TRY003",
+    # D203 one-blank-line-before-class is incompatible with D211
+    "D203",
+    # Multi-line docstring summary should start at the first line - looks ugly
+    "D212",
+    # Temporary ignore - todo add
+    "D100",
+    "D101",  # priority add
+    "D104",
+    "D400",
+    "D401",
+    "D414",
+    "D415",
+    "D417",
 ]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
