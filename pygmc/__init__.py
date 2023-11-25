@@ -4,6 +4,7 @@ __license__ = "MIT"
 
 
 import logging
+import time
 
 from pygmc.connection import Connection
 from pygmc.devices import auto_get_device
@@ -64,6 +65,8 @@ def connect(
 
     device = auto_get_device(connection)
 
+    # The GMC300S is main reason for sleep/delay...
+    time.sleep(0.2)
     ver = device.get_version()
     msg = f"Connected device={ver}"
     print(msg)  # print for newbies w/o logger knowledge
