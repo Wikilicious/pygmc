@@ -11,7 +11,9 @@ logger = logging.getLogger("pygmc.devices.rfc1801")
 class DeviceRFC1801(BaseDevice):
     def __init__(self, connection):
         """
-        A GMC device. Can be used with:
+        Represent a GMC device.
+
+        Can be used with:
         GMC-500, GMC-500+, GMC-600, GMC-600+
 
         Parameters
@@ -72,7 +74,8 @@ class DeviceRFC1801(BaseDevice):
 
     def get_cpm(self) -> int:
         """
-        Get CPM counts-per-minute data
+        Get CPM counts-per-minute data.
+
         Specs don't provide how CPM is computed nor if both high/low tubes are used.
 
         Returns
@@ -90,7 +93,8 @@ class DeviceRFC1801(BaseDevice):
 
     def get_usv_h(self) -> float:
         """
-        Get µSv/h
+        Get µSv/h.
+
         Uses device calibration config.
 
         Returns
@@ -112,7 +116,7 @@ class DeviceRFC1801(BaseDevice):
 
     def get_cps(self) -> int:
         """
-        Get CPS counts-per-second
+        Get CPS counts-per-second.
 
         Returns
         -------
@@ -126,7 +130,7 @@ class DeviceRFC1801(BaseDevice):
 
     def get_max_cps(self) -> int:
         """
-        Get the maximum counts-per-second since the device POWERED ON
+        Get the maximum counts-per-second since the device POWERED ON.
 
         Returns
         -------
@@ -140,7 +144,8 @@ class DeviceRFC1801(BaseDevice):
 
     def get_cpmh(self) -> int:
         """
-        Get CPM of the high dose tube
+        Get CPM of the high dose tube.
+
         Only GMC-500+ supported (spec RFC1801)
 
         Returns
@@ -159,7 +164,8 @@ class DeviceRFC1801(BaseDevice):
 
     def get_cpml(self) -> int:
         """
-        Get CPM of the low dose tube
+        Get CPM of the low dose tube.
+
         Only GMC-500+ supported (spec RFC1801)
 
         Returns
@@ -174,7 +180,7 @@ class DeviceRFC1801(BaseDevice):
 
     def get_datetime(self) -> datetime.datetime:
         """
-        Get device datetime
+        Get device datetime.
 
         Returns
         -------
@@ -194,7 +200,9 @@ class DeviceRFC1801(BaseDevice):
 
     def get_gyro(self) -> Tuple[int, int, int]:
         """
-        Get gyroscope data. No units specified in spec RFC1801 nor RFC1201 :(
+        Get gyroscope data.
+
+        No units specified in spec RFC1801 nor RFC1201 :(
 
         Returns
         -------
@@ -217,7 +225,7 @@ class DeviceRFC1801(BaseDevice):
 
     def get_voltage(self) -> float:
         """
-        Get device voltage
+        Get device voltage.
 
         Returns
         -------
@@ -238,7 +246,7 @@ class DeviceRFC1801(BaseDevice):
 
     def get_config(self) -> dict:
         """
-        Get device config
+        Get device config.
 
         Returns
         -------
@@ -252,32 +260,22 @@ class DeviceRFC1801(BaseDevice):
         return self._config
 
     def power_off(self) -> None:
-        """
-        Power OFF device.
-
-        Returns
-        -------
-
-        """
+        """Power OFF device."""
         cmd = b"<POWEROFF>>"
         self.connection.reset_buffers()
         self.connection.write(cmd)
 
     def power_on(self) -> None:
-        """
-        Power ON device.
-
-        Returns
-        -------
-
-        """
+        """Power ON device."""
         cmd = b"<POWERON>>"
         self.connection.reset_buffers()
         self.connection.write(cmd)
 
     def heartbeat_live(self, count=60) -> Generator[int, None, None]:
         """
-        Get live CPS data, as a generator. i.e. yield (return) CPS as available.
+        Get live CPS data, as a generator.
+
+        i.e. yield (return) CPS as available.
 
         Parameters
         ----------
@@ -330,6 +328,7 @@ class DeviceRFC1801(BaseDevice):
     def send_key(self, key_number) -> None:
         """
         Send key press signal to device.
+
         Note the power button acts as menu clicks and does not power on/off.
 
         Parameters
@@ -340,10 +339,6 @@ class DeviceRFC1801(BaseDevice):
             key=1 -> S2 (down button)
             key=2 -> S3 (up button)
             key=3 -> S4 (power button)
-
-        Returns
-        -------
-
         """
         if key_number not in (0, 1, 2, 3):
             raise ValueError("key must be in (0, 1, 2, 3)")
@@ -360,10 +355,6 @@ class DeviceRFC1801(BaseDevice):
         datetime_: None | datetime.datetime
             Datetime to set. Default=None uses current time on computer i.e.
             datetime.datetime.now()
-
-        Returns
-        -------
-        None
 
         Raises
         ------
@@ -399,10 +390,8 @@ class DeviceRFC1801(BaseDevice):
     def reboot(self) -> None:
         """
         Reboot device.
-        Note: Different from power off-on as it changes display to default.
 
-        Returns
-        -------
+        Note: Different from power off-on as it changes display to default.
 
         """
         cmd = b"<REBOOT>>"

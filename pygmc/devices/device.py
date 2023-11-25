@@ -7,7 +7,9 @@ logger = logging.getLogger("pygmc.device")
 class BaseDevice:
     def __init__(self, connection):
         """
-        A simple limited GMC device. Can be used with:
+        Represent a base GMC device.
+
+        Can be used with:
         GMC-300, GMC-320, GMC-500, GMC-500+, GMC-600, GMC-600+
 
         Parameters
@@ -111,7 +113,7 @@ class BaseDevice:
 
     def _parse_cfg(self, cfg_bytes: bytes) -> None:
         """
-        Parses config bytes and sets self._config
+        Parses config bytes and sets self._config.
 
         Parameters
         ----------
@@ -142,6 +144,7 @@ class BaseDevice:
     def _heartbeat_on(self) -> None:
         """
         Turn heartbeat ON.
+
         CPS data is automatically written to the buffer every second.
         """
         self.connection.write(b"<HEARTBEAT1>>")
@@ -150,6 +153,7 @@ class BaseDevice:
     def _heartbeat_off(self) -> None:
         """
         Turn heartbeat OFF.
+
         Stop writing data to buffer every second.
         """
         self.connection.write(b"<HEARTBEAT0>>")
@@ -159,6 +163,7 @@ class BaseDevice:
     def get_version(self) -> str:
         """
         Get version of device.
+
         Has a sleep wait to read as spec RFC1801 doesn't specify end char nor byte size.
         i.e. SLOW.
 
@@ -173,6 +178,7 @@ class BaseDevice:
         return result.decode("utf8")
 
     def get_serial(self) -> str:
+        """Get serial."""
         cmd = b"<GETSERIAL>>"
         self.connection.reset_buffers()
         result = self.connection.get_exact(cmd, size=7)

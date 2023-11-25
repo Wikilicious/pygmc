@@ -11,7 +11,9 @@ logger = logging.getLogger("pygmc.devices.rfc1201")
 class DeviceRFC1201(BaseDevice):
     def __init__(self, connection):
         """
-        A GMC device. Can be used with:
+        Represent a GMC device.
+
+        Can be used with:
         GMC-280, GMC-300, GMC-320
 
         Parameters
@@ -72,7 +74,7 @@ class DeviceRFC1201(BaseDevice):
 
     def get_cpm(self) -> int:
         """
-        Get CPM counts-per-minute data
+        Get CPM counts-per-minute data.
 
         Returns
         -------
@@ -91,7 +93,8 @@ class DeviceRFC1201(BaseDevice):
 
     def get_usv_h(self) -> float:
         """
-        Get µSv/h
+        Get µSv/h.
+
         Uses device calibration config.
 
         Returns
@@ -114,6 +117,7 @@ class DeviceRFC1201(BaseDevice):
     def get_gyro(self) -> Tuple[int, int, int]:
         """
         Get gyroscope data.
+
         No units specified in spec RFC1801 nor RFC1201 :(
 
         Returns
@@ -137,7 +141,7 @@ class DeviceRFC1201(BaseDevice):
 
     def get_voltage(self) -> float:
         """
-        Get device voltage
+        Get device voltage.
 
         Returns
         -------
@@ -153,7 +157,7 @@ class DeviceRFC1201(BaseDevice):
 
     def get_datetime(self) -> datetime.datetime:
         """
-        Get device datetime
+        Get device datetime.
 
         Returns
         -------
@@ -173,7 +177,7 @@ class DeviceRFC1201(BaseDevice):
 
     def get_config(self) -> dict:
         """
-        Get device config
+        Get device config.
 
         Returns
         -------
@@ -256,25 +260,13 @@ class DeviceRFC1201(BaseDevice):
         print("", end="\n")  # empty print to move carriage return to next line
 
     def power_off(self) -> None:
-        """
-        Power OFF device.
-
-        Returns
-        -------
-
-        """
+        """Power OFF device."""
         cmd = b"<POWEROFF>>"
         self.connection.reset_buffers()
         self.connection.write(cmd)
 
     def power_on(self) -> None:
-        """
-        Power ON device.
-
-        Returns
-        -------
-
-        """
+        """Power ON device."""
         cmd = b"<POWERON>>"
         self.connection.reset_buffers()
         self.connection.write(cmd)
@@ -282,6 +274,7 @@ class DeviceRFC1201(BaseDevice):
     def send_key(self, key_number) -> None:
         """
         Send key press signal to device.
+
         Note the power button acts as menu clicks and does not power on/off.
 
         Parameters
@@ -292,9 +285,6 @@ class DeviceRFC1201(BaseDevice):
             key=1 -> S2 (down button)
             key=2 -> S3 (up button)
             key=3 -> S4 (power button)
-
-        Returns
-        -------
 
         """
         if key_number not in (0, 1, 2, 3):
@@ -312,10 +302,6 @@ class DeviceRFC1201(BaseDevice):
         datetime_: None | datetime.datetime
             Datetime to set. Default=None uses current time on computer i.e.
             datetime.datetime.now()
-
-        Returns
-        -------
-        None
 
         Raises
         ------
@@ -351,11 +337,8 @@ class DeviceRFC1201(BaseDevice):
     def reboot(self) -> None:
         """
         Reboot device.
+
         Note: Different from power off-on as it changes display to default.
-
-        Returns
-        -------
-
         """
         cmd = b"<REBOOT>>"
         self.connection.write(cmd)

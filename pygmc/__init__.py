@@ -1,3 +1,10 @@
+"""
+Python interface/API for GQ GMC Geiger Counter.
+
+github: https://github.com/Wikilicious/pygmc
+pypi: https://pypi.org/project/pygmc/
+readthedocs: https://pygmc.readthedocs.io/
+"""
 __version__ = "0.5.4"
 __author__ = "Thomaz"
 __license__ = "MIT"
@@ -22,6 +29,7 @@ def connect(
 ):
     """
     Connect to device.
+
     If all parameters are None, _auto_connect() flow is used which attempts to connect
     to all available ports.
     If ANY parameter is given; it's used to refine the search, any matches are considered.
@@ -52,7 +60,6 @@ def connect(
     ConnectionError
         Unable to connect to device.
     """
-
     connection = Connection()
     connection.connect(
         port=port,
