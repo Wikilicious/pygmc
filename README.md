@@ -5,7 +5,14 @@
 [![GitHub](https://img.shields.io/github/license/Wikilicious/pygmc)](https://github.com/Wikilicious/pygmc/blob/master/LICENSE)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/pygmc)](https://pypi.org/project/pygmc/)
 
-Python package for Geiger–Müller Counter (GMC) - communicate via USB serial interface.  
+PyGMC is a Python API for Geiger–Müller Counters (GMCs) / Geiger Counters.
+It has just one dependency (pyserial) and works on multiple operating
+systems: Windows, OSX, Linux. PyGMC aims to be a minimalistic interface -
+lowering the installation requirements and allowing the user to build their
+own tools on top of a stable package.
+
+- [PYPI](https://pypi.org/project/pygmc/)
+- [Documentation](https://pygmc.readthedocs.io/)
 
 ### Installation 
 ```shell

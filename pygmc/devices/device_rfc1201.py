@@ -1,7 +1,7 @@
 import datetime
 import logging
 import struct
-from typing import Tuple
+from typing import Generator, Tuple
 
 from .device import BaseDevice
 
@@ -122,10 +122,14 @@ class DeviceRFC1201(BaseDevice):
             (X, Y, Z) gyroscope data
         """
         cmd = b"<GETGYRO>>"
-        # Return: Seven bytes gyroscope data in hexdecimal: BYTE1,BYTE2,BYTE3,BYTE4,BYTE5,BYTE6,BYTE7
-        # Here: BYTE1,BYTE2 are the X position data in 16 bits value. The first byte is MSB byte data and second byte is LSB byte data.
-        # BYTE3,BYTE4 are the Y position data in 16 bits value. The first byte is MSB byte data and second byte is LSB byte data.
-        # BYTE5,BYTE6 are the Z position data in 16 bits value. The first byte is MSB byte data and second byte is LSB byte data.
+        # Return: Seven bytes gyroscope data in hexdecimal:
+        #   BYTE1,BYTE2,BYTE3,BYTE4,BYTE5,BYTE6,BYTE7
+        # Here: BYTE1,BYTE2 are the X position data in 16 bits value.
+        #   The first byte is MSB byte data and second byte is LSB byte data.
+        # BYTE3,BYTE4 are the Y position data in 16 bits value.
+        #   The first byte is MSB byte data and second byte is LSB byte data.
+        # BYTE5,BYTE6 are the Z position data in 16 bits value.
+        #   The first byte is MSB byte data and second byte is LSB byte data.
         # BYTE7 always 0xAA
         result = self.connection.get_exact(cmd, expected=b"", size=7)
         x, y, z, dummy = struct.unpack(">hhhB", result)
@@ -182,24 +186,7 @@ class DeviceRFC1201(BaseDevice):
         self._parse_cfg(cfg_bytes)
         return self._config
 
-    def heartbeat_on(self) -> None:
-        """
-        Turn heartbeat ON.
-        CPS data is automatically written to the buffer every second.
-        """
-        self.connection.write(b"<HEARTBEAT1>>")
-        logger.debug("Heartbeat ON")
-
-    def heartbeat_off(self) -> None:
-        """
-        Turn heartbeat OFF.
-        Stop writing data to buffer every second.
-        """
-        self.connection.write(b"<HEARTBEAT0>>")
-        self.connection.reset_buffers()
-        logger.debug("Heartbeat OFF")
-
-    def heartbeat_live(self, count=60) -> int:
+    def heartbeat_live(self, count=60) -> Generator[int, None, None]:
         """
         Get live CPS data, as a generator. i.e. yield (return) CPS as available.
 
@@ -209,44 +196,40 @@ class DeviceRFC1201(BaseDevice):
             How many CPS counts to return (default=60). Theoretically, 1 count = 1 second.
             Wall-clock time can be a bit higher or lower.
 
-        Returns
-        -------
-        int
-            CPS - Counts-Per-Second
-
         Yields
         ------
-        Iterator[int]
+        int
             CPS
         """
         self.connection.reset_buffers()
-        for i in range(count):
-            raw = self.connection.read_until(expected=b"", size=2)
-            # only first 14 bits are used, because why not complicate things
-            cps = struct.unpack(">H", raw)[0] & 0x3FFF
-            yield cps
+        try:
+            self._heartbeat_on()
+            for i in range(count):
+                raw = self.connection.read_until(expected=b"", size=2)
+                # only first 14 bits are used, because why not complicate things
+                cps = struct.unpack(">H", raw)[0] & 0x3FFF
+                yield cps
+        finally:
+            self._heartbeat_off()
 
-    # def heartbeat_live_print(self, count=60, byte_size=4) -> None:
-    #     """
-    #     Print live CPS data.
-    #
-    #     Parameters
-    #     ----------
-    #     count : int, optional
-    #         How many CPS counts to return (default=60). Theoretically, 1 count = 1 second.
-    #         Wall-clock time can be a bit higher or lower.
-    #     byte_size : int, optional
-    #         Expected result size, by default 4.
-    #         GMC-500=4, GMC-320=2
-    #
-    #     """
-    #     max_ = 0
-    #     i = 0
-    #     self.connection.reset_buffers()
-    #     for cps in self.heartbeat_live(count=count, byte_size=byte_size):
-    #         i += 1
-    #         if cps > max_:
-    #             max_ = cps
-    #         # empty leading space for terminal cursor
-    #         msg = f" cps={cps:<2} | max={max_:<2} | loop={i:<10,}"
-    #         print(msg, end="\r")  # Carriage return - update line we just printed
+    def heartbeat_live_print(self, count=60) -> None:
+        """
+        Print live CPS data.
+
+        Parameters
+        ----------
+        count : int, optional
+            How many CPS counts to return (default=60). Theoretically, 1 count = 1 second.
+            Wall-clock time can be a bit higher or lower.
+
+        """
+        max_ = 0
+        i = 0
+        for cps in self.heartbeat_live(count=count):
+            i += 1
+            if cps > max_:
+                max_ = cps
+            # empty leading space for terminal cursor
+            msg = f" cps={cps:<2} | max={max_:<2} | loop={i:<10,}"
+            print(msg, end="\r")  # Carriage return - update line we just printed
+        print("", end="\n")  # empty print to move carriage return to next line

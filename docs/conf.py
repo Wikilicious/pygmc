@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.abspath(".."))
 project = "PyGMC"
 copyright = "2023, Thomaz"
 author = "Thomaz"
-release = "0.5.3"
+release = "0.5.4"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

@@ -103,6 +103,10 @@ class BaseDevice:
             },
         }
 
+        # will likely save someone a lot of time
+        # heartbeat-on keeps writing to buffer making other functionality un-parsable
+        self._heartbeat_off()
+
         logger.debug("Initialize BaseDevice")
 
     def _parse_cfg(self, cfg_bytes: bytes) -> None:
@@ -135,11 +139,28 @@ class BaseDevice:
 
             self._config[name] = value
 
+    def _heartbeat_on(self) -> None:
+        """
+        Turn heartbeat ON.
+        CPS data is automatically written to the buffer every second.
+        """
+        self.connection.write(b"<HEARTBEAT1>>")
+        logger.debug("Heartbeat ON")
+
+    def _heartbeat_off(self) -> None:
+        """
+        Turn heartbeat OFF.
+        Stop writing data to buffer every second.
+        """
+        self.connection.write(b"<HEARTBEAT0>>")
+        self.connection.reset_buffers()
+        logger.debug("Heartbeat OFF")
+
     def get_version(self) -> str:
         """
         Get version of device.
-        Has a sleep wait to read as spec RFC1801 doesn't specify
-        end char nor byte size.
+        Has a sleep wait to read as spec RFC1801 doesn't specify end char nor byte size.
+        i.e. SLOW.
 
         Returns
         -------
