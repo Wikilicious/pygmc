@@ -236,6 +236,45 @@ class DeviceRFC1801(BaseDevice):
         result = float(result[0:3])  # e.g. float(b'4.8')
         return result
 
+    def get_config(self) -> dict:
+        """
+        Get device config
+
+        Returns
+        -------
+        dict
+
+        """
+        cmd = b"<GETCFG>>"
+        self.connection.reset_buffers()
+        cfg_bytes = self.connection.get_exact(cmd, expected=b"", size=512)
+        self._parse_cfg(cfg_bytes)
+        return self._config
+
+    def power_off(self) -> None:
+        """
+        Power OFF device.
+
+        Returns
+        -------
+
+        """
+        cmd = b"<POWEROFF>>"
+        self.connection.reset_buffers()
+        self.connection.write(cmd)
+
+    def power_on(self) -> None:
+        """
+        Power ON device.
+
+        Returns
+        -------
+
+        """
+        cmd = b"<POWERON>>"
+        self.connection.reset_buffers()
+        self.connection.write(cmd)
+
     def heartbeat_live(self, count=60) -> Generator[int, None, None]:
         """
         Get live CPS data, as a generator. i.e. yield (return) CPS as available.
@@ -279,25 +318,95 @@ class DeviceRFC1801(BaseDevice):
             i += 1
             if cps > max_:
                 max_ = cps
+            # Yea, I'd rather use f-string... just trying to make it compatible with
+            # older Python versions
             # empty leading space for terminal cursor
-            msg = f" cps={cps:<2} | max={max_:<2} | loop={i:<10,}"
+            msg = " cps={cps:<2} | max={max_:<2} | loop={i:<10,}".format(
+                cps=cps, max_=max_, i=i
+            )
             print(msg, end="\r")  # Carriage return - update line we just printed
         print("", end="\n")  # empty print to move carriage return to next line
 
-    def get_config(self) -> dict:
+    def send_key(self, key_number) -> None:
         """
-        Get device config
+        Send key press signal to device.
+        Note the power button acts as menu clicks and does not power on/off.
+
+        Parameters
+        ----------
+        key_number: int
+            Each number represents a key-press.
+            key=0 -> S1 (back button)
+            key=1 -> S2 (down button)
+            key=2 -> S3 (up button)
+            key=3 -> S4 (power button)
 
         Returns
         -------
-        dict
 
         """
-        cmd = b"<GETCFG>>"
+        if key_number not in (0, 1, 2, 3):
+            raise ValueError("key must be in (0, 1, 2, 3)")
+
+        cmd = "<KEY{}>>".format(key_number).encode()
+        self.connection.write(cmd)
+
+    def set_datetime(self, datetime_=None) -> None:
+        """
+        Set datetime on device.
+
+        Parameters
+        ----------
+        datetime_: None | datetime.datetime
+            Datetime to set. Default=None uses current time on computer i.e.
+            datetime.datetime.now()
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        ValueError
+            Year value earlier than 2000.
+
+        RuntimeError
+            Unexpected response from device.
+
+        """
+        if not datetime_:
+            datetime_ = datetime.datetime.now()
+
+        if datetime_.year < 2000:
+            # welp... device has year hardcoded 20xx
+            raise ValueError("Device can't set year earlier than 2000")
+
+        dt_cmd = struct.pack(
+            ">BBBBBB",
+            datetime_.year - 2000,
+            datetime_.month,
+            datetime_.day,
+            datetime_.hour,
+            datetime_.minute,
+            datetime_.second,
+        )
+        cmd = b"<SETDATETIME" + dt_cmd + b">>"
         self.connection.reset_buffers()
-        cfg_bytes = self.connection.get_exact(cmd, expected=b"", size=512)
-        self._parse_cfg(cfg_bytes)
-        return self._config
+        result = self.connection.get_exact(cmd, expected=b"", size=1)
+        if not result == b"\xaa":
+            raise RuntimeError("Unexpected response: {}".format(result))
+
+    def reboot(self) -> None:
+        """
+        Reboot device.
+        Note: Different from power off-on as it changes display to default.
+
+        Returns
+        -------
+
+        """
+        cmd = b"<REBOOT>>"
+        self.connection.write(cmd)
 
     # To-be-added soon(TM)
     # def _history(self, start_position, size):
