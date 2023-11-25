@@ -5,7 +5,7 @@ github: https://github.com/Wikilicious/pygmc
 pypi: https://pypi.org/project/pygmc/
 readthedocs: https://pygmc.readthedocs.io/
 """
-__version__ = "0.5.4"
+__version__ = "0.6.0"
 __author__ = "Thomaz"
 __license__ = "MIT"
 
