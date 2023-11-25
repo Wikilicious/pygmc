@@ -13,7 +13,7 @@ PyGMC Documentation
 
 PyGMC is a Python API for Geiger–Müller Counters (GMCs) / Geiger Counters.
 It has just one dependency (pyserial) and works on multiple operating
-systems: Windows, OSX, Linux, BSD. PyGMC aims to be a minimalistic interface -
+systems: Windows, OSX, Linux. PyGMC aims to be a minimalistic interface -
 lowering the installation requirements and allowing the user to build their
 own tools on top of a stable package.
 
