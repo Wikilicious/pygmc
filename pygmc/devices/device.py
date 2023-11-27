@@ -68,7 +68,7 @@ class BaseDevice:
             "SaveDataType": {
                 "index": 32,
                 "size": 1,
-                "description": "1=Once per minute?",
+                "description": "History data; 0=off, 1=CPS, 2=CPM, 3=CPM(avg/hr)",
                 "type": None,
             },
             "MaxCPM": {

@@ -59,8 +59,10 @@ class DeviceRFC1801(BaseDevice):
                 "Baudrate": {
                     "index": 57,
                     "size": 1,
-                    # see https://www.gqelectronicsllc.com/forum/topic.asp?TOPIC_ID=4948 reply#14
-                    "description": "0=115200, 1=1200, 2=2400, 3=4800, 4=9600, 5=14400, 6=19200, 7=28800, 8=38400, 9=57600",
+                    # see https://www.gqelectronicsllc.com/forum/topic.asp?TOPIC_ID=4948
+                    # reply#14
+                    "description": "0=115200, 1=1200, 2=2400, 3=4800, 4=9600, 5=14400, "
+                                   "6=19200, 7=28800, 8=38400, 9=57600",
                     "type": None,
                 },
                 "Threshold_uSv": {
@@ -83,7 +85,8 @@ class DeviceRFC1801(BaseDevice):
         int
             Counts per minute (GMC has 2 tubes, assumed cpm accounts for both?)
         """
-        # A 32 bit unsigned integer is returned. In total 4 bytes data return from GQ GMC unit.
+        # A 32 bit unsigned integer is returned.
+        # In total 4 bytes data return from GQ GMC unit.
         # The first byte is MSB byte data and fourth byte is LSB byte data.
         # e.g.: 00 00 00 1C     the returned CPM is 28. big-endian
         cmd = b"<GETCPM>>"
@@ -154,7 +157,8 @@ class DeviceRFC1801(BaseDevice):
             Counts per minute on high dose tube (GMC has 2 tubes)
         """
         #
-        # A 32 bit unsigned integer is returned. In total 4 bytes data return from GQ GMC unit.
+        # A 32 bit unsigned integer is returned.
+        # In total 4 bytes data return from GQ GMC unit.
         # The first byte is MSB byte data and fourth byte is LSB byte data.
         # e.g.: 00 00 00 1C     the returned CPM is 28. big-endian
         cmd = b"<GETCPMH>>"
@@ -280,7 +284,7 @@ class DeviceRFC1801(BaseDevice):
         Parameters
         ----------
         count : int, optional
-            How many CPS counts to return (default=60). Theoretically, 1 count = 1 second.
+            How many CPS counts to return (default=60). Theoretically, 1count = 1second.
             Wall-clock time can be a bit higher or lower.
 
         Yields
@@ -306,7 +310,7 @@ class DeviceRFC1801(BaseDevice):
         Parameters
         ----------
         count : int, optional
-            How many CPS counts to return (default=60). Theoretically, 1 count = 1 second.
+            How many CPS counts to return (default=60). Theoretically, 1count = 1second.
             Wall-clock time can be a bit higher or lower.
 
         """
@@ -401,7 +405,8 @@ class DeviceRFC1801(BaseDevice):
     # def _history(self, start_position, size):
     #     # <SPIR[A2][A1][A0][L1][L0]>>
     #     # A2,A1,A0 are three bytes address data, from MSB to LSB.
-    #     # The L1,L0 are the data length requested.  L1 is high byte of 16 bit integer and L0 is low byte.
+    #     # The L1,L0 are the data length requested.
+    #     L1 is high byte of 16 bit integer and L0 is low byte.
     #     # \xff is end of file?
     #     start = struct.pack(">I", start_position)[1:]
     #     # 2**11 = 2048

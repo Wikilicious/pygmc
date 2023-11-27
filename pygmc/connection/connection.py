@@ -31,9 +31,10 @@ class Connection:
         timeout : int, optional
             serial connection timeout, seconds, by default 5
         """
-        # on windows it's usually COM3
-        # on linux it's usually /dev/ttyUSB0
-        # http://www.gqelectronicsllc.com/downloads/ to look for updates? AIR-760 has no protocol docs :(
+        # on windows, it's usually COM3
+        # on linux, it's usually /dev/ttyUSB0
+        # http://www.gqelectronicsllc.com/downloads/ to look for updates?
+        # AIR-760 has no protocol docs :(
         # baudrates from GQ-RFC1201 & GQ-RFC1801
         # http://www.gqelectronicsllc.com/download/GQ-RFC1201.txt
         # http://www.gqelectronicsllc.com/download/GQ-RFC1801.txt
@@ -55,7 +56,8 @@ class Connection:
         self._con = None
 
         # pyserial has a breaking change from 3.4 to 3.5
-        # TypeError: SerialBase.read_until() got an unexpected keyword argument 'expected'
+        # TypeError:
+        #     SerialBase.read_until() got an unexpected keyword argument 'expected'
         # 'terminator' for serial==3.4, 'expected' for serial==3.5
         # Doing ape logic below to resolve pyserial smooth brain breaking change
         try:
@@ -103,7 +105,8 @@ class Connection:
             return False
 
     def _check_baudrate(self, con):
-        # perhaps always turn off heartbeat when connecting because that messes with the output buffer
+        # perhaps always turn off heartbeat when connecting
+        # because that messes with the output buffer
         con.reset_input_buffer()
         con.reset_output_buffer()
         cmd = b"<GETSERIAL>>"
@@ -145,7 +148,8 @@ class Connection:
                     return True
                 con.close()
             except (OSError, serial.SerialException) as e:
-                # SerialException – In case the device can not be found or can not be configured.
+                # SerialException
+                # In case the device can not be found or can not be configured.
                 logger.warning(f"{e}", exc_info=True)
         return False
 
@@ -216,11 +220,11 @@ class Connection:
         ----------
         port : str | None, optional
             Exact port (device dev path / com port) e.g. '/dev/ttyUSB0'
-            If port is specified, the following kwargs are ignored: vid, pid, description,
-            hardware_id.
+            If port is specified, the following kwargs are ignored: vid, pid,
+            description, hardware_id.
         baudrate: int | None
-            Device baudrate. Leave None to auto-detect baudrate. Only applicable when port
-            is specified.
+            Device baudrate. Leave None to auto-detect baudrate. Only applicable when
+            port is specified.
         vid : str | None, optional
             Device vendor ID as hex, by default None
         pid : str | None, optional
@@ -321,12 +325,14 @@ class Connection:
         Reset input & output buffers on pyserial connection.
 
         reset_input_buffer(): Clear input buffer, discarding all that is in the buffer.
-        reset_output_buffer(): Clear output buffer, aborting the current output and discarding all that is in the buffer.
+        reset_output_buffer(): Clear output buffer, aborting the current output and
+        discarding all that is in the buffer.
         """
         # Clear input buffer, discarding all that is in the buffer.
         logger.debug("reset_input_buffer")
         self._con.reset_input_buffer()
-        # Clear output buffer, aborting the current output and discarding all that is in the buffer.
+        # Clear output buffer,
+        # aborting the current output and discarding all that is in the buffer.
         logger.debug("reset_output_buffer")
         self._con.reset_output_buffer()
 
@@ -359,12 +365,14 @@ class Connection:
         bytes
             Device response
         """
-        # return everything currently in device buffer i.e. may be incomplete so wait a bit before read
+        # return everything currently in device buffer
+        # i.e. may be incomplete so wait a bit before read
         time.sleep(wait_sleep)
         # in pyserial==3.5 method added .read_all()
         # Read all bytes currently available in the buffer of the OS.
         # BUT... not available in pyserial==3.4
-        # ADDITIONALLY, https://pyserial.readthedocs.io/en/latest/index.html says latest yet refers to 3.4
+        # ADDITIONALLY, https://pyserial.readthedocs.io/en/latest/index.html
+        # says latest yet refers to 3.4
         # SO... lets make this requirement 3.4 and manually implement read_all()
         if hasattr(self._con, "read_all"):
             logger.debug("read_all")

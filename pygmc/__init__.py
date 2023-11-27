@@ -32,7 +32,8 @@ def connect(
 
     If all parameters are None, _auto_connect() flow is used which attempts to connect
     to all available ports.
-    If ANY parameter is given; it's used to refine the search, any matches are considered.
+    If ANY parameter is given; it's used to refine the search, any matches are
+    considered.
     Parameters are used as an OR search.
 
     Parameters
