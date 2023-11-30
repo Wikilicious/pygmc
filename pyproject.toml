@@ -1,6 +1,6 @@
 [project]
 name = "pygmc"
-version = "0.6.0"
+version = "0.7.0"
 authors = [
     {name = "Thomaz"},
 ]
@@ -25,10 +25,10 @@ classifiers = [
 
 
 [project.urls]
-homepage = "https://github.com/Wikilicious/pygmc"
-documentation = "https://pygmc.readthedocs.io/"
-source = "https://github.com/Wikilicious/pygmc"
-tracker = "https://github.com/Wikilicious/pygmc/issues"
+Homepage = "https://github.com/Wikilicious/pygmc"
+Documentation = "https://pygmc.readthedocs.io/"
+Source = "https://github.com/Wikilicious/pygmc"
+Tracker = "https://github.com/Wikilicious/pygmc/issues"
 
 
 [tool.black]

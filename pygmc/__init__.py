@@ -4,8 +4,9 @@ Python interface/API for GQ GMC Geiger Counter.
 github: https://github.com/Wikilicious/pygmc
 pypi: https://pypi.org/project/pygmc/
 readthedocs: https://pygmc.readthedocs.io/
+Thomaz - 2023
 """
-__version__ = "0.6.0"
+__version__ = "0.7.0"
 __author__ = "Thomaz"
 __license__ = "MIT"
 
@@ -15,6 +16,7 @@ import time
 
 from pygmc.connection import Connection
 from pygmc.devices import auto_get_device
+from pygmc.history import HistoryParser
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +34,8 @@ def connect(
 
     If all parameters are None, _auto_connect() flow is used which attempts to connect
     to all available ports.
-    If ANY parameter is given; it's used to refine the search, any matches are considered.
+    If ANY parameter is given; it's used to refine the search, any matches are
+    considered.
     Parameters are used as an OR search.
 
     Parameters

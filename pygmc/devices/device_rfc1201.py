@@ -59,8 +59,10 @@ class DeviceRFC1201(BaseDevice):
                 "Baudrate": {
                     "index": 57,
                     "size": 1,
-                    # see https://www.gqelectronicsllc.com/forum/topic.asp?TOPIC_ID=4948 reply#12
-                    "description": "64=1200,160=2400,208=4800,232=9600,240=14400,244=19200,248=28800,250=38400,252=57600,254=115200",
+                    # see https://www.gqelectronicsllc.com/forum/topic.asp?TOPIC_ID=4948
+                    # reply#12
+                    "description": "64=1200,160=2400,208=4800,232=9600,240=14400,"
+                    "244=19200,248=28800,250=38400,252=57600,254=115200",
                     "type": None,
                 },
                 "Threshold_uSv": {
@@ -214,7 +216,7 @@ class DeviceRFC1201(BaseDevice):
         Parameters
         ----------
         count : int, optional
-            How many CPS counts to return (default=60). Theoretically, 1 count = 1 second.
+            How many CPS counts to return (default=60). Theoretically, 1count = 1second.
             Wall-clock time can be a bit higher or lower.
 
         Yields
@@ -240,7 +242,7 @@ class DeviceRFC1201(BaseDevice):
         Parameters
         ----------
         count : int, optional
-            How many CPS counts to return (default=60). Theoretically, 1 count = 1 second.
+            How many CPS counts to return (default=60). Theoretically, 1count = 1second.
             Wall-clock time can be a bit higher or lower.
 
         """
