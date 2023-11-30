@@ -62,7 +62,7 @@ class DeviceRFC1201(BaseDevice):
                     # see https://www.gqelectronicsllc.com/forum/topic.asp?TOPIC_ID=4948
                     # reply#12
                     "description": "64=1200,160=2400,208=4800,232=9600,240=14400,"
-                                   "244=19200,248=28800,250=38400,252=57600,254=115200",
+                    "244=19200,248=28800,250=38400,252=57600,254=115200",
                     "type": None,
                 },
                 "Threshold_uSv": {

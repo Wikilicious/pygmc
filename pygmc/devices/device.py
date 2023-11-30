@@ -1,6 +1,8 @@
 import logging
 import struct
 
+from ..history import HistoryParser
+
 logger = logging.getLogger("pygmc.device")
 
 
@@ -18,6 +20,9 @@ class BaseDevice:
             An connection interface to the USB device.
         """
         self.connection = connection
+
+        self._flash_memory_size_bytes = 2**20  # 1 MiB
+        self._flash_memory_page_size_bytes = 2**11  # 2048 B
 
         # the config under the hood, initialize empty and lazily create
         self._config = dict()
@@ -111,6 +116,42 @@ class BaseDevice:
 
         logger.debug("Initialize BaseDevice")
 
+    def _heartbeat_off(self) -> None:
+        """
+        Turn heartbeat OFF.
+
+        Stop writing data to buffer every second.
+        """
+        self.connection.write(b"<HEARTBEAT0>>")
+        self.connection.reset_buffers()
+        logger.debug("Heartbeat OFF")
+
+    def _heartbeat_on(self) -> None:
+        """
+        Turn heartbeat ON.
+
+        CPS data is automatically written to the buffer every second.
+        """
+        self.connection.write(b"<HEARTBEAT1>>")
+        logger.debug("Heartbeat ON")
+
+    def _read_history_position(self, start_position, chunk_size):
+        # http://www.gqelectronicsllc.com/forum/topic.asp?TOPIC_ID=4445
+        # don't need spir fix because... reset read/write buffer.
+        start_s = struct.pack(">I", start_position)[1:]
+        size_s = struct.pack(">H", chunk_size)
+
+        cmd = b"<SPIR" + start_s + size_s + b">>"
+        data = self.connection.get_exact(cmd, size=chunk_size)
+
+        # MUST reset buffers... or deal with the bug
+        # device with bug returns chunk_size + 1
+        # if we read chunk_size, then there is one byte left in buffer
+        # which will throw off all further commands
+        self.connection.reset_buffers()
+
+        return data
+
     def _parse_cfg(self, cfg_bytes: bytes) -> None:
         """
         Parses config bytes and sets self._config.
@@ -141,24 +182,68 @@ class BaseDevice:
 
             self._config[name] = value
 
-    def _heartbeat_on(self) -> None:
+    def get_raw_history(self):
         """
-        Turn heartbeat ON.
+        Get device history data.
+        Stops reading when read entire page contains empty data.
+        Full 1 MiB read takes ~5 minutes on the slower 57,600 baudrate
 
-        CPS data is automatically written to the buffer every second.
-        """
-        self.connection.write(b"<HEARTBEAT1>>")
-        logger.debug("Heartbeat ON")
+        Returns
+        -------
+        bytes
+            Raw history data.
 
-    def _heartbeat_off(self) -> None:
         """
-        Turn heartbeat OFF.
+        i = 0
+        hist = b""
+        for start_position in range(
+            0, self._flash_memory_size_bytes, self._flash_memory_page_size_bytes
+        ):
+            data = self._read_history_position(
+                start_position, self._flash_memory_page_size_bytes
+            )
 
-        Stop writing data to buffer every second.
+            if data.count(b"\xff") == self._flash_memory_page_size_bytes:
+                logger.debug("Entire read block '\\xff' stop reading history")
+                break
+            hist += data
+
+            i += 1
+            logger.debug("Read history page {} done".format(i))
+
+        return hist
+
+    def save_history(self, file_path):
         """
-        self.connection.write(b"<HEARTBEAT0>>")
-        self.connection.reset_buffers()
-        logger.debug("Heartbeat OFF")
+        Download device memory history and save to file.
+
+        Parameters
+        ----------
+        file_path: str
+            Path to save.
+
+        """
+        data = self.get_raw_history()
+        with open(file_path, "wb") as f:
+            f.write(data)
+
+    def get_history_data(self):
+        """
+        Get tidy device memory history in a list of tuples.
+        First row is column names.
+        Columns: "datetime", "count", "unit", "mode", "reference_datetime", "notes"
+
+        Returns
+        -------
+        list:
+            List of tuples, first row is column names.
+
+        """
+        data = self.get_raw_history()
+        h = HistoryParser(data)
+        data = [h.get_columns()]
+        data.extend(h.get_data())
+        return data
 
     def get_version(self) -> str:
         """
@@ -174,7 +259,10 @@ class BaseDevice:
         """
         cmd = b"<GETVER>>"
         self.connection.reset_buffers()
-        result = self.connection.get(cmd)
+        # longer sleep wait for GMC-300S since it returns nothing at times after 0.3 sec
+        # TODO: add a read_at_least X bytes method that will then wait Y seconds after
+        # in case more bytes come in. make this method more reliable!
+        result = self.connection.get(cmd, wait_sleep=0.4)
         return result.decode("utf8")
 
     def get_serial(self) -> str:
