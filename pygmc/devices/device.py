@@ -248,9 +248,7 @@ class BaseDevice:
     def get_version(self) -> str:
         """
         Get version of device.
-
-        Has a sleep wait to read as spec RFC1801 doesn't specify end char nor byte size.
-        i.e. SLOW.
+        Only considers 14 bytes.
 
         Returns
         -------
@@ -259,10 +257,9 @@ class BaseDevice:
         """
         cmd = b"<GETVER>>"
         self.connection.reset_buffers()
-        # longer sleep wait for GMC-300S since it returns nothing at times after 0.3 sec
-        # TODO: add a read_at_least X bytes method that will then wait Y seconds after
-        # in case more bytes come in. make this method more reliable!
-        result = self.connection.get(cmd, wait_sleep=0.4)
+        result = self.connection.get_exact(cmd, size=14)
+        # Spec RFC1801 doesn't specify len. Reset buffers incase there are more bytes.
+        self.connection.reset_buffers()
         return result.decode("utf8")
 
     def get_serial(self) -> str:
