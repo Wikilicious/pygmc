@@ -7,38 +7,44 @@ import sys  # noqa: I001
 import pytest
 from serial import Serial
 
-# mock_serial only works on Linux
-if not sys.platform.startswith("linux"):
-    pytest.skip("skipping tests - not running linux", allow_module_level=True)
-
 # D.R.Y. import from test_gmc500_plus_device_rfc_1801
 from .test_gmc500_plus_device_rfc_1801 import (  # noqa: I001
     cmd_response_map,
     device_result_map,
 )
-from pygmc import connection, devices
+import pygmc
 
-mock_serial = pytest.importorskip("mock_serial", reason="Doesn't work on Win")
-
-
-# Mock device
-mock_dev = mock_serial.MockSerial()
-mock_dev.open()
-for cmd, resp in cmd_response_map.items():
-    mock_dev.stub(receive_bytes=cmd, send_bytes=resp)
-
-# We turn heartbeat off before many ops... need to instruct mock_dev to ignore
-mock_dev.stub(receive_bytes=b"<HEARTBEAT0>>", send_bytes=b"")
-
-mock_dev_serial = Serial(mock_dev.port)
-
-connection = connection.Connection()
-connection.connect_user_provided(mock_dev_serial)
-
-
-gc = devices.DeviceRFC1801(connection)
 
 parametrize_data = [(k, v) for k, v in device_result_map.items()]
+
+
+def get_mock_gc():
+    """Lazily import mock_serial to avoid ModuleError in Windows"""
+    mock_serial = pytest.importorskip("mock_serial", reason="Doesn't work on Win")
+    # Mock device
+    mock_dev = mock_serial.MockSerial()
+    mock_dev.open()
+    for cmd, resp in cmd_response_map.items():
+        mock_dev.stub(receive_bytes=cmd, send_bytes=resp)
+
+    # We turn heartbeat off before many ops... need to instruct mock_dev to ignore
+    mock_dev.stub(receive_bytes=b"<HEARTBEAT0>>", send_bytes=b"")
+
+    mock_dev_serial = Serial(mock_dev.port)
+
+    connection = pygmc.connection.Connection()
+    connection.connect_user_provided(mock_dev_serial)
+
+    gc = pygmc.devices.DeviceRFC1801(connection)
+
+    return gc
+
+
+# mock_serial only works on Linux
+if not sys.platform.startswith("linux"):
+    pytest.skip("skipping tests - not running linux", allow_module_level=True)
+else:
+    gc = get_mock_gc()
 
 
 @pytest.mark.parametrize("cmd,expected", parametrize_data)
@@ -59,10 +65,10 @@ def test_expected_results(cmd, expected):
 def test_connection_method():
     """Tests connection tester flow."""
     # returns true
-    assert connection._test_con()
+    assert gc.connection._test_con()
 
 
 def test_baudrate_method():
     """Tests baudrate check flow."""
     # returns true
-    assert connection._check_baudrate(connection._con)
+    assert gc.connection._check_baudrate(gc.connection._con)
