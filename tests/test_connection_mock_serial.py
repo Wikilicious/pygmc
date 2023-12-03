@@ -3,11 +3,16 @@ This mocks a device at a lower level and allows us to test pygmc.Connection()
 We just need to test one device because all we really want is to test pygmc.Connection()
 mock_serial only works on Linux, so skip test if not on Linux.
 """
-import sys
-
+import sys  # noqa: I001
 import pytest
-from mock_serial import MockSerial
 from serial import Serial
+
+try:
+    from mock_serial import MockSerial  # noqa
+except Exception as e:
+    print(e)
+    # ImportError or ModuleNotFoundError
+    pytest.skip("skipping tests - not running linux", allow_module_level=True)
 
 from pygmc import connection, devices
 
