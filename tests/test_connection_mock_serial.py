@@ -5,23 +5,25 @@ mock_serial only works on Linux, so skip test if not on Linux.
 """
 import sys  # noqa: I001
 import pytest
+
+# mock_serial only works on Linux
+if not sys.platform.startswith("linux"):
+    pytest.skip("skipping tests - not running linux", allow_module_level=True)
+
 from serial import Serial
 
 try:
+    # Is this needed now that we put the platform test above?
     from mock_serial import MockSerial  # noqa
 except Exception as e:
     print(e)
     # ImportError or ModuleNotFoundError
     pytest.skip("skipping tests - not running linux", allow_module_level=True)
 
-from pygmc import connection, devices
+from pygmc import connection, devices  # noqa: I001
 
 # D.R.Y. import from test_gmc500_plus_device_rfc_1801
 from .test_gmc500_plus_device_rfc_1801 import cmd_response_map, device_result_map
-
-# mock_serial only works on Linux
-if not sys.platform.startswith("linux"):
-    pytest.skip("skipping tests - not running linux", allow_module_level=True)
 
 
 # Mock device
