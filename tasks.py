@@ -25,3 +25,9 @@ def bugbear(ctx):
 @task
 def build(ctx):
     ctx.run("python -m build")
+
+
+@task
+def docs(ctx):
+    # Run in ./docs
+    ctx.run("make html")
