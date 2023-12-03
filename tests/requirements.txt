@@ -1,0 +1,6 @@
+pyserial>=3.4
+mock_serial
+pytest
+flake8
+ruff
+black
