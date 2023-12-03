@@ -206,7 +206,7 @@ class Connection:
         vid=None,
         pid=None,
         description=None,
-        hardware_id=None,
+        hardware_id="1A86:7523",
     ) -> None:
         """
         Connect to device.
@@ -232,9 +232,8 @@ class Connection:
         description : str | None, optional
             Device description, by default None
         hardware_id : str | None, optional
-            Device hwid, by default None
+            Device hwid, by default "1A86:7523"
             e.g. 'USB VID:PID=1A86:7523 LOCATION=2-1'
-            Use hex for vid:pid input
 
         Raises
         ------
