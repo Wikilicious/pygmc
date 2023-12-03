@@ -17,7 +17,12 @@ systems: Windows, OSX, Linux. PyGMC aims to be a minimalistic interface -
 lowering the installation requirements and allowing the user to build their
 own tools on top of a stable package.
 
-Source code on GitHub: https://github.com/Wikilicious/pygmc
+Why use PyGMC:
+    * Has tests required to deploy (`See Tests <https://github.com/Wikilicious/pygmc/tree/master/tests>`_)
+    * Has documentation (You're looking at it)
+    * Easily installable via `pip install pygmc` from `PYPI <https://pypi.org/project/pygmc/>`_
+    * Follows PEP8 standards & common linting standards
+    * Source code on GitHub: https://github.com/Wikilicious/pygmc
 
 
 Install PyGMC
@@ -88,6 +93,7 @@ should work (e.g. the old GMC-280 )
 
    pygmc
    examples
+   knownissues
 
 
 Indices and tables

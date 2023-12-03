@@ -6,7 +6,7 @@ pypi: https://pypi.org/project/pygmc/
 readthedocs: https://pygmc.readthedocs.io/
 Thomaz - 2023
 """
-__version__ = "0.7.0"
+__version__ = "0.7.1"
 __author__ = "Thomaz"
 __license__ = "MIT"
 
@@ -27,7 +27,7 @@ def connect(
     vid=None,
     pid=None,
     description=None,
-    hardware_id=None,
+    hardware_id="1A86:7523",
 ):
     """
     Connect to device.
@@ -54,9 +54,8 @@ def connect(
     description : str | None, optional
         Device description, by default None
     hardware_id : str | None, optional
-        Device hwid, by default None
-        e.g. 'USB VID:PID=1A86:7523 LOCATION=2-1'
-        Use hex for vid:pid input
+        Device hwid, by default '1A86:7523'
+        e.g. hwid='USB VID:PID=1A86:7523 LOCATION=2-1'
 
     Raises
     ------
