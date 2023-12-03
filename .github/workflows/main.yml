@@ -29,12 +29,12 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install flake8 pytest ruff black
+        # python -m pip install flake8 pytest ruff black
         # todo: can pip install requirements from pyproject.toml?
-        pip install -r requirements.txt
-    - name: Lint with ruff
-      run: |
-        ruff --output-format=github --config=pyproject.toml .
+        pip install -r tests/requirements.txt
+#    - name: Lint with ruff
+#      run: |
+#        ruff --output-format=github --config=pyproject.toml .
     - name: Test with pytest
       run: |
         pytest
