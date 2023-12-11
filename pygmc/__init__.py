@@ -15,7 +15,20 @@ import logging
 import time
 
 from pygmc.connection import Connection
-from pygmc.devices import auto_get_device
+from pygmc.devices import (
+    GMC300,
+    GMC300S,
+    GMC320,
+    GMC500,
+    GMC600,
+    GMC800,
+    GMC300EPlus,
+    GMC320Plus,
+    GMC320PlusV5,
+    GMC500Plus,
+    GMC600Plus,
+    auto_get_device,
+)
 from pygmc.history import HistoryParser
 
 logger = logging.getLogger(__name__)
