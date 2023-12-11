@@ -38,6 +38,8 @@ Install PyGMC from PYPI: https://pypi.org/project/pygmc/
 Example Usage
 -------------
 
+Auto discover connected GMC, auto identify baudrate, and auto select correct device.
+
 .. code-block:: python
 
     import pygmc
@@ -50,6 +52,17 @@ Example Usage
     cpm = gc.get_cpm()
     print(cpm)
 
+
+Connect to specified GMC device with exact USB port/device/com.
+
+.. code-block:: python
+
+    import pygmc
+
+    gc = pygmc.GMC320.connect(port='/dev/ttyUSB0')
+
+    cpm = gc.get_cpm()
+    print(cpm)
 
 
 Supported Devices
