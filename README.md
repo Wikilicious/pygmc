@@ -21,6 +21,7 @@ pip install pygmc
 
 
 ### Example Usage
+Auto discover connected GMC, auto identify baudrate, and auto select correct device.
 ```pycon
 import pygmc
 
@@ -28,6 +29,15 @@ gc = pygmc.connect()
 
 ver = gc.get_version()
 print(ver)
+
+cpm = gc.get_cpm()
+print(cpm)
+```
+Connect to specified GMC device with exact USB port/device/com.
+```pycon
+import pygmc
+
+gc = pygmc.GMC320.connect(port='/dev/ttyUSB0')
 
 cpm = gc.get_cpm()
 print(cpm)

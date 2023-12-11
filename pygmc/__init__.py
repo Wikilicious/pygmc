@@ -6,7 +6,7 @@ pypi: https://pypi.org/project/pygmc/
 readthedocs: https://pygmc.readthedocs.io/
 Thomaz - 2023
 """
-__version__ = "0.7.1"
+__version__ = "0.8.0"
 __author__ = "Thomaz"
 __license__ = "MIT"
 
@@ -15,7 +15,20 @@ import logging
 import time
 
 from pygmc.connection import Connection
-from pygmc.devices import auto_get_device
+from pygmc.devices import (
+    GMC300,
+    GMC300S,
+    GMC320,
+    GMC500,
+    GMC600,
+    GMC800,
+    GMC300EPlus,
+    GMC320Plus,
+    GMC320PlusV5,
+    GMC500Plus,
+    GMC600Plus,
+    auto_get_device,
+)
 from pygmc.history import HistoryParser
 
 logger = logging.getLogger(__name__)
