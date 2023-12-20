@@ -7,7 +7,12 @@ from .device_rfc1201 import DeviceRFC1201
 class GMC300(DeviceRFC1201):
     """GMC-300"""
 
-    def __init__(self, connection):
+    def __init__(
+        self,
+        port=None,
+        baudrate=57600,
+        connection=None,
+    ):
         """
         Represent a GMC-300 device.
 
@@ -48,7 +53,12 @@ class GMC300(DeviceRFC1201):
 class GMC300S(DeviceRFC1201):
     """GMC-300S"""
 
-    def __init__(self, connection):
+    def __init__(
+        self,
+        port=None,
+        baudrate=57600,
+        connection=None,
+    ):
         """
         Represent a GMC-300S device.
 
@@ -57,7 +67,12 @@ class GMC300S(DeviceRFC1201):
         connection : pygmc.Connection
             An connection interface to the USB device.
         """
-        super().__init__(connection)
+        if isinstance(connection, Connection):
+            super().__init__(connection)
+        else:
+            conn = Connection(timeout=5)
+            conn.connect(port=port, baudrate=baudrate)
+            super().__init__(conn)
         self._baudrate = 57600
 
     @staticmethod

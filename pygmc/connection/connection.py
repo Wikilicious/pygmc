@@ -154,7 +154,7 @@ class Connection:
         return False
 
     @staticmethod
-    def _get_available_usb_devices(regexp=None, include_links=True) -> list:
+    def get_available_usb_devices(regexp=None, include_links=True) -> list:
         """
         Get all available USB devices.
 
@@ -174,7 +174,7 @@ class Connection:
             available ports, type [serial.tools.list_ports_linux.SysFS]
         """
         logger.debug(
-            f"_get_available_usb_devices(regexp={regexp}, include_links={include_links})"
+            f"get_available_usb_devices(regexp={regexp}, include_links={include_links})"
         )
         if not regexp:
             _ports = serial_list_ports.comports(include_links=include_links)
@@ -230,7 +230,9 @@ class Connection:
         pid : str | None, optional
             Device product ID as hex, by default None
         description : str | None, optional
-            Device description, by default None
+            Device description, by default None (GQ Electronics has YET to add
+            description, see
+            https://www.gqelectronicsllc.com/forum/topic.asp?TOPIC_ID=10318 )
         hardware_id : str | None, optional
             Device hwid, by default "1A86:7523"
             e.g. 'USB VID:PID=1A86:7523 LOCATION=2-1'
@@ -257,16 +259,24 @@ class Connection:
             inputs = [vid, pid, description, hardware_id]
             if not any(v is not None for v in inputs):
                 # no user info to go on... let's see what we can do...
-                ports = self._get_available_usb_devices()
+                ports = self.get_available_usb_devices()
             else:
                 regexp = "|".join([x for x in inputs if x])
                 logger.debug(f"serial.tools.list_ports.grep({regexp})")
-                ports = self._get_available_usb_devices(regexp=regexp)
+                ports = self.get_available_usb_devices(regexp=regexp)
 
             works = False
             for avail_port in ports:
                 port = avail_port.device  # e.g. /dev/ttyUSBO
                 logger.debug(port)
+                if baudrate:
+                    logger.debug(f"Using: {port} with provided baudrate: {baudrate}")
+                    self._con = serial.Serial(
+                        port=port, baudrate=self._baudrate, timeout=self._timeout
+                    )
+                    # should we be who breaks the news? No. cuz damn quirks making pygmc look like fools.
+                    # self._test_con()
+                    break
                 works = self._find_correct_baudrate(port=port)
                 if works:
                     self._con = serial.Serial(
@@ -384,7 +394,7 @@ class Connection:
         logger.debug(f"response={result}")
         return result
 
-    def read_until(self, expected=b"", size=None) -> bytes:
+    def read_until(self, size=None, expected=b"") -> bytes:
         r"""
         Read device data until expected LF is reached or expected result size is reached.
 
@@ -394,20 +404,47 @@ class Connection:
 
         Parameters
         ----------
-        expected : bytes, optional
-            Expected end character, by default b''
         size : None | int, optional
             Length of expected bytes, by default None
+        expected : bytes, optional
+            Expected end character, by default b''
 
         Returns
         -------
         bytes
             Device response
         """
-        logger.debug(f"read_until(expected={expected}, size={size})")
+        logger.debug(f"read_until(size={size}, expected={expected})")
         # This is to resolve pyserial breaking change. See __init__ above.
         params = {self._read_until_param_name: expected, "size": size}
         result = self._con.read_until(**params)
+        logger.debug(f"response={result}")
+        return result
+
+    def read_at_least(self, size, wait_sleep=0.3):
+        """
+        Read at least <size> bytes then wait <wait_sleep> and read whatever is ready in
+        the buffer.
+
+        Parameters
+        ----------
+        size: int
+            Minimum size expected to read or timeout.
+        wait_sleep: float | int
+            Time to wait in seconds to check if there's anything remaining in the buffer.
+
+        Returns
+        -------
+        bytes
+
+        """
+        logger.debug(f"read_at_least(size={size}, wait_sleep={wait_sleep})")
+
+        params = {self._read_until_param_name: b"", "size": size}
+        # read until size or timeout
+        min_size_result = self._con.read_until(**params)
+        extra_result = self.read(wait_sleep=wait_sleep)
+        result = min_size_result + extra_result
         logger.debug(f"response={result}")
         return result
 
@@ -436,7 +473,7 @@ class Connection:
         logger.debug(f"response={result}")
         return result
 
-    def get_exact(self, cmd, expected=b"", size=None) -> bytes:
+    def get_exact(self, cmd, size=None, expected=b"") -> bytes:
         """
         Write and read exact.
 
@@ -448,17 +485,17 @@ class Connection:
         ----------
         cmd : bytes
             Write command e.g. <GETVER>>
-        expected : bytes, optional
-            Expected end char, by default b''
         size : int | None, optional
             Expected response size, by default None
+        expected : bytes, optional
+            Expected end char, by default b''
 
         Returns
         -------
         bytes
             Device response
         """
-        logger.debug(f"get_exact(cmd={cmd}, expected={expected}, size={size})")
+        logger.debug(f"get_exact(cmd={cmd}, size={size}, expected={expected})")
         self.write(cmd)
         result = self.read_until(expected=expected, size=size)
         return result
