@@ -199,6 +199,60 @@ class Connection:
         )
         return ports
 
+    def get_connection_details(self):
+        """
+        Get connection details.
+        Values of None means not available or not applicable.
+
+        Returns
+        -------
+        dict
+
+        """
+        deets = {
+            "port": None,
+            "baudrate": None,
+            "is_open": None,
+            "in_waiting": None,
+            "out_waiting": None,
+            "name": None,
+            "timeout": None,
+        }
+
+        for key in list(deets):
+            if hasattr(self._con, key):
+                deets[key] = getattr(self._con, key)
+
+        usb_info = {
+            "description": None,
+            "hwid": None,
+            "location": None,
+            "pid": None,
+            "usb_device_path": None,
+            "vid": None,
+        }
+
+        deets_port = deets["port"]
+        ports = []
+        port_info = None
+        if deets_port:
+            ports = list(
+                serial_list_ports.grep(regexp=f"^{deets_port}$", include_links=True)
+            )
+        if deets_port is None and len(ports) != 1:
+            # port_info will be None which won't hasattr i.e. returns all None.
+            logger.warning(f"Unable to identify USB info for {deets_port}")
+        else:
+            port_info = ports[0]
+
+        for key in list(usb_info):
+            if hasattr(port_info, key):
+                usb_info[key] = getattr(port_info, key)
+
+        deets.update(usb_info)
+
+        return deets
+
     def connect(
         self,
         port=None,
@@ -242,6 +296,10 @@ class Connection:
         ConnectionError
             _description_
         """
+        if description:
+            # be petty when deserved
+            # We could've avoided a bunch of tedious coding
+            logger.warning("GQ Electronics has yet to add USB description")
         if port and baudrate:
             self.connect_exact(port, baudrate)
         elif port:
@@ -274,8 +332,7 @@ class Connection:
                     self._con = serial.Serial(
                         port=port, baudrate=self._baudrate, timeout=self._timeout
                     )
-                    # should we be who breaks the news? No. cuz damn quirks making pygmc look like fools.
-                    # self._test_con()
+                    # cross your fingers
                     break
                 works = self._find_correct_baudrate(port=port)
                 if works:
@@ -284,6 +341,7 @@ class Connection:
                     )
                     logger.info(f"Connected to {self._con.port}")
                     break
+
             if not works:
                 raise ConnectionError()
             logger.info(f"Connected: {self._con}")
@@ -426,12 +484,23 @@ class Connection:
         Read at least <size> bytes then wait <wait_sleep> and read whatever is ready in
         the buffer.
 
+        i.e. Wait as long as needed to get at-least <size> bytes then wait <wait_sleep>
+        seconds and read whatever else is ready in the buffer.
+
         Parameters
         ----------
         size: int
             Minimum size expected to read or timeout.
         wait_sleep: float | int
             Time to wait in seconds to check if there's anything remaining in the buffer.
+
+        Notes
+        -----
+        This method resets the input & output buffers after; incase there was extra info
+        that would've been added to the buffers.
+        This is useful for ill-defined specs where there is no exact size prescribed and
+        not waiting enough may result in empty/partial response and waiting too long is
+        wasteful if the response was ready quickly.
 
         Returns
         -------
@@ -446,6 +515,8 @@ class Connection:
         extra_result = self.read(wait_sleep=wait_sleep)
         result = min_size_result + extra_result
         logger.debug(f"response={result}")
+        self.reset_buffers()
+
         return result
 
     def get(self, cmd, wait_sleep=0.3) -> bytes:
