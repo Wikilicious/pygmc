@@ -11,9 +11,6 @@ class BaseDevice:
         """
         Represent a base GMC device.
 
-        Can be used with:
-        GMC-300, GMC-320, GMC-500, GMC-500+, GMC-600, GMC-600+
-
         Parameters
         ----------
         connection : pygmc.Connection
@@ -271,3 +268,14 @@ class BaseDevice:
         self.connection.reset_buffers()
         result = self.connection.get_exact(cmd, size=7)
         return result.hex()
+
+    def get_connection_details(self):
+        """
+        Get connection details from pyserial.
+
+        Returns
+        -------
+        dict
+
+        """
+        return self.connection.get_connection_details()

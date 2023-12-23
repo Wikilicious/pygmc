@@ -101,18 +101,22 @@ _regex_device_match_list = [
 
 def auto_get_device(connection):
     """
-    Auto get device class
+    Auto get device class.
+    Given a connection, use device's version response to identify the best matching
+    device class.
 
     Parameters
     ----------
-    connection
+    connection: pygmc.connection.Connection
 
     Returns
     -------
+    pygmc.devices.BaseDevice
 
     """
     cmd = b"<GETVER>>"
     connection.reset_buffers()
+    # TODO: evaluate switching to the .read_at_least() e.g. handle timeout exception
     version = connection.get(cmd).decode("utf8")
     logger.debug(f"Device={version}")
 
@@ -121,7 +125,7 @@ def auto_get_device(connection):
         m = re.match(pattern=pattern, string=version)
         if m:
             logger.debug(f"pattern={pattern} matched version={version}")
-            return device_re["device"](connection)
+            return device_re["device"](port=None, connection=connection)
 
     logger.debug("No device regex matched. Trying lower level base version.")
 

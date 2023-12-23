@@ -37,7 +37,7 @@ Connect to specified GMC device with exact USB port/device/com.
 ```pycon
 import pygmc
 
-gc = pygmc.GMC320.connect(port='/dev/ttyUSB0')
+gc = pygmc.GMC320('/dev/ttyUSB0')
 
 cpm = gc.get_cpm()
 print(cpm)

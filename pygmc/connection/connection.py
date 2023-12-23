@@ -154,7 +154,7 @@ class Connection:
         return False
 
     @staticmethod
-    def _get_available_usb_devices(regexp=None, include_links=True) -> list:
+    def get_available_usb_devices(regexp=None, include_links=True) -> list:
         """
         Get all available USB devices.
 
@@ -174,7 +174,7 @@ class Connection:
             available ports, type [serial.tools.list_ports_linux.SysFS]
         """
         logger.debug(
-            f"_get_available_usb_devices(regexp={regexp}, include_links={include_links})"
+            f"get_available_usb_devices(regexp={regexp}, include_links={include_links})"
         )
         if not regexp:
             _ports = serial_list_ports.comports(include_links=include_links)
@@ -198,6 +198,60 @@ class Connection:
             f"USB ports/dev-devices found: {[(x.device, x.hwid) for x in ports]}"
         )
         return ports
+
+    def get_connection_details(self):
+        """
+        Get connection details.
+        Values of None means not available or not applicable.
+
+        Returns
+        -------
+        dict
+
+        """
+        deets = {
+            "port": None,
+            "baudrate": None,
+            "is_open": None,
+            "in_waiting": None,
+            "out_waiting": None,
+            "name": None,
+            "timeout": None,
+        }
+
+        for key in list(deets):
+            if hasattr(self._con, key):
+                deets[key] = getattr(self._con, key)
+
+        usb_info = {
+            "description": None,
+            "hwid": None,
+            "location": None,
+            "pid": None,
+            "usb_device_path": None,
+            "vid": None,
+        }
+
+        deets_port = deets["port"]
+        ports = []
+        port_info = None
+        if deets_port:
+            ports = list(
+                serial_list_ports.grep(regexp=f"^{deets_port}$", include_links=True)
+            )
+        if deets_port is None and len(ports) != 1:
+            # port_info will be None which won't hasattr i.e. returns all None.
+            logger.warning(f"Unable to identify USB info for {deets_port}")
+        else:
+            port_info = ports[0]
+
+        for key in list(usb_info):
+            if hasattr(port_info, key):
+                usb_info[key] = getattr(port_info, key)
+
+        deets.update(usb_info)
+
+        return deets
 
     def connect(
         self,
@@ -230,7 +284,9 @@ class Connection:
         pid : str | None, optional
             Device product ID as hex, by default None
         description : str | None, optional
-            Device description, by default None
+            Device description, by default None (GQ Electronics has YET to add
+            description, see
+            https://www.gqelectronicsllc.com/forum/topic.asp?TOPIC_ID=10318 )
         hardware_id : str | None, optional
             Device hwid, by default "1A86:7523"
             e.g. 'USB VID:PID=1A86:7523 LOCATION=2-1'
@@ -240,6 +296,10 @@ class Connection:
         ConnectionError
             _description_
         """
+        if description:
+            # be petty when deserved
+            # We could've avoided a bunch of tedious coding
+            logger.warning("GQ Electronics has yet to add USB description")
         if port and baudrate:
             self.connect_exact(port, baudrate)
         elif port:
@@ -257,16 +317,23 @@ class Connection:
             inputs = [vid, pid, description, hardware_id]
             if not any(v is not None for v in inputs):
                 # no user info to go on... let's see what we can do...
-                ports = self._get_available_usb_devices()
+                ports = self.get_available_usb_devices()
             else:
                 regexp = "|".join([x for x in inputs if x])
                 logger.debug(f"serial.tools.list_ports.grep({regexp})")
-                ports = self._get_available_usb_devices(regexp=regexp)
+                ports = self.get_available_usb_devices(regexp=regexp)
 
             works = False
             for avail_port in ports:
                 port = avail_port.device  # e.g. /dev/ttyUSBO
                 logger.debug(port)
+                if baudrate:
+                    logger.debug(f"Using: {port} with provided baudrate: {baudrate}")
+                    self._con = serial.Serial(
+                        port=port, baudrate=self._baudrate, timeout=self._timeout
+                    )
+                    # cross your fingers
+                    break
                 works = self._find_correct_baudrate(port=port)
                 if works:
                     self._con = serial.Serial(
@@ -274,6 +341,7 @@ class Connection:
                     )
                     logger.info(f"Connected to {self._con.port}")
                     break
+
             if not works:
                 raise ConnectionError()
             logger.info(f"Connected: {self._con}")
@@ -384,7 +452,7 @@ class Connection:
         logger.debug(f"response={result}")
         return result
 
-    def read_until(self, expected=b"", size=None) -> bytes:
+    def read_until(self, size=None, expected=b"") -> bytes:
         r"""
         Read device data until expected LF is reached or expected result size is reached.
 
@@ -394,21 +462,61 @@ class Connection:
 
         Parameters
         ----------
-        expected : bytes, optional
-            Expected end character, by default b''
         size : None | int, optional
             Length of expected bytes, by default None
+        expected : bytes, optional
+            Expected end character, by default b''
 
         Returns
         -------
         bytes
             Device response
         """
-        logger.debug(f"read_until(expected={expected}, size={size})")
+        logger.debug(f"read_until(size={size}, expected={expected})")
         # This is to resolve pyserial breaking change. See __init__ above.
         params = {self._read_until_param_name: expected, "size": size}
         result = self._con.read_until(**params)
         logger.debug(f"response={result}")
+        return result
+
+    def read_at_least(self, size, wait_sleep=0.3):
+        """
+        Read at least <size> bytes then wait <wait_sleep> and read whatever is ready in
+        the buffer.
+
+        i.e. Wait as long as needed to get at-least <size> bytes then wait <wait_sleep>
+        seconds and read whatever else is ready in the buffer.
+
+        Parameters
+        ----------
+        size: int
+            Minimum size expected to read or timeout.
+        wait_sleep: float | int
+            Time to wait in seconds to check if there's anything remaining in the buffer.
+
+        Notes
+        -----
+        This method resets the input & output buffers after; incase there was extra info
+        that would've been added to the buffers.
+        This is useful for ill-defined specs where there is no exact size prescribed and
+        not waiting enough may result in empty/partial response and waiting too long is
+        wasteful if the response was ready quickly.
+
+        Returns
+        -------
+        bytes
+
+        """
+        logger.debug(f"read_at_least(size={size}, wait_sleep={wait_sleep})")
+
+        params = {self._read_until_param_name: b"", "size": size}
+        # read until size or timeout
+        min_size_result = self._con.read_until(**params)
+        extra_result = self.read(wait_sleep=wait_sleep)
+        result = min_size_result + extra_result
+        logger.debug(f"response={result}")
+        self.reset_buffers()
+
         return result
 
     def get(self, cmd, wait_sleep=0.3) -> bytes:
@@ -436,7 +544,7 @@ class Connection:
         logger.debug(f"response={result}")
         return result
 
-    def get_exact(self, cmd, expected=b"", size=None) -> bytes:
+    def get_exact(self, cmd, size=None, expected=b"") -> bytes:
         """
         Write and read exact.
 
@@ -448,17 +556,17 @@ class Connection:
         ----------
         cmd : bytes
             Write command e.g. <GETVER>>
-        expected : bytes, optional
-            Expected end char, by default b''
         size : int | None, optional
             Expected response size, by default None
+        expected : bytes, optional
+            Expected end char, by default b''
 
         Returns
         -------
         bytes
             Device response
         """
-        logger.debug(f"get_exact(cmd={cmd}, expected={expected}, size={size})")
+        logger.debug(f"get_exact(cmd={cmd}, size={size}, expected={expected})")
         self.write(cmd)
         result = self.read_until(expected=expected, size=size)
         return result
