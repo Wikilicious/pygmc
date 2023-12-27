@@ -67,8 +67,8 @@ Theoretically, any GQ GMC device following communication protocol RFC1201 or RFC
 ### Notes
 - Alternative Python projects for GQ GMC:
   - [GeigerLog](https://sourceforge.net/projects/geigerlog/)
-  - [gq-gmc-control](https://github.com/chaim-zax/gq-gmc-control)
-  - [gmc](https://gitlab.com/slippers/gmc)
+  - gq-gmc-control
+  - gmc
 - Device website [GQ Electronics](https://gqelectronicsllc.com/) Seattle, WA
   - Not affiliated in any way.
 
