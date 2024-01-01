@@ -32,8 +32,9 @@ def get_mock_gc():
 
     mock_dev_serial = Serial(mock_dev.port)
 
-    connection = pygmc.connection.Connection()
-    connection.connect_user_provided(mock_dev_serial)
+    connection = pygmc.connection.Connection(
+        port="dummy", baudrate=123, serial_connection=mock_dev_serial
+    )
 
     gc = pygmc.devices.DeviceRFC1801(connection)
 
@@ -60,15 +61,3 @@ def test_expected_results(cmd, expected):
     print(f"{cmd=}")
     print(f"{expected=}")
     print(f"{result=}")
-
-
-def test_connection_method():
-    """Tests connection tester flow."""
-    # returns true
-    assert gc.connection._test_con()
-
-
-def test_baudrate_method():
-    """Tests baudrate check flow."""
-    # returns true
-    assert gc.connection._check_baudrate(gc.connection._con)
