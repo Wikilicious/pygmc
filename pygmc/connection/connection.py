@@ -260,9 +260,8 @@ class Connection:
         """
         logger.debug(f"read_at_least(size={size}, wait_sleep={wait_sleep})")
 
-        params = {self._read_until_param_name: b"", "size": size}
         # read until size or timeout
-        min_size_result = self._con.read_until(**params)
+        min_size_result = self.read_until(size=size, expected=b"")
         extra_result = self.read(wait_sleep=wait_sleep)
         result = min_size_result + extra_result
         logger.debug(f"response={result}")
