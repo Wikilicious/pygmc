@@ -256,10 +256,7 @@ class BaseDevice:
         """
         cmd = b"<GETVER>>"
         self.connection.reset_buffers()
-        # longer sleep wait for GMC-300S since it returns nothing at times after 0.3 sec
-        # TODO: add a read_at_least X bytes method that will then wait Y seconds after
-        # in case more bytes come in. make this method more reliable!
-        result = self.connection.get(cmd, wait_sleep=0.4)
+        result = self.connection.get_at_least(cmd=cmd, size=7, wait_sleep=0.05)
         return result.decode("utf8")
 
     def get_serial(self) -> str:
