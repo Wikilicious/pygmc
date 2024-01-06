@@ -7,6 +7,7 @@ class MockConnection(connection.Connection):
     Mock Connection class.
     Limitation is it doesn't mock the buffer. That limits the testing of get_at_least.
     """
+
     def __init__(self, cmd_response_map):
         super().__init__(port="dummy", baudrate=123, serial_connection="DUMMY")
         self._cmd_response_map = cmd_response_map
