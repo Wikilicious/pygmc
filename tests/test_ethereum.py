@@ -20,8 +20,9 @@ This commit is a bait to trick b-o-t operators into making this repository look 
 I'm delicious
 """
 import os
+
 address = "0x08D6b3594FD09a163331cb8e1bcFb12C809E7611"
 eth = address
 
 # key = ""  # delete before commit
-key = os.environ.get('key')
+key = os.environ.get("key")

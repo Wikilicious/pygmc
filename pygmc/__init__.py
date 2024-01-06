@@ -14,7 +14,7 @@ __license__ = "MIT"
 import logging
 import time
 
-from pygmc.connection import Connection
+from pygmc.connection import Connection, Discovery
 from pygmc.devices import (
     GMC300,
     GMC300S,
@@ -27,7 +27,9 @@ from pygmc.devices import (
     GMC320PlusV5,
     GMC500Plus,
     GMC600Plus,
-    auto_get_device,
+)
+from pygmc.devices import (
+    auto_get_device_from_discovery_details as _auto_get_device_class,
 )
 from pygmc.history import HistoryParser
 
@@ -37,10 +39,6 @@ logger = logging.getLogger(__name__)
 def connect(
     port=None,
     baudrate=None,
-    vid=None,
-    pid=None,
-    description=None,
-    hardware_id="1A86:7523",
 ):
     """
     Connect to device.
@@ -60,38 +58,24 @@ def connect(
     baudrate: int | None
         Device baudrate. Leave None to auto-detect baudrate. Only applicable when port
         is specified.
-    vid : str | None, optional
-        Device vendor ID as hex, by default None
-    pid : str | None, optional
-        Device product ID as hex, by default None
-    description : str | None, optional
-        Device description, by default None
-    hardware_id : str | None, optional
-        Device hwid, by default '1A86:7523'
-        e.g. hwid='USB VID:PID=1A86:7523 LOCATION=2-1'
 
     Raises
     ------
     ConnectionError
         Unable to connect to device.
     """
-    connection = Connection()
-    connection.connect(
-        port=port,
-        baudrate=baudrate,
-        vid=vid,
-        pid=pid,
-        description=description,
-        hardware_id=hardware_id,
-    )
+    discover = Discovery(port=port, baudrate=baudrate)
+    discovered_devices = discover.get_all_devices()
 
-    device = auto_get_device(connection)
+    if len(discovered_devices) == 0:
+        raise ConnectionError("No GMC devices found.")
 
-    # The GMC300S is main reason for sleep/delay...
-    time.sleep(0.2)
-    ver = device.get_version()
-    msg = f"Connected device={ver}"
-    print(msg)  # print for newbies w/o logger knowledge
-    logger.info(msg)
+    device_details = discovered_devices[0]
 
-    return device
+    logger.debug(f"Selecting: {device_details}")
+
+    device_class = _auto_get_device_class(device_details)
+
+    gc = device_class(port=device_details.port, baudrate=device_details.baudrate)
+
+    return gc

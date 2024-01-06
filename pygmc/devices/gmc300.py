@@ -1,7 +1,4 @@
-"""
-GQ Electronics GMC-3XX series Geiger Counter Devices.
-"""
-import serial
+"""GQ Electronics GMC-3XX series Geiger Counter Devices."""
 
 from ..connection import Connection
 from .device_rfc1201 import DeviceRFC1201

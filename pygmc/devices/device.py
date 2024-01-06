@@ -182,6 +182,7 @@ class BaseDevice:
     def get_raw_history(self):
         """
         Get device history data.
+
         Stops reading when read entire page contains empty data.
         Full 1 MiB read takes ~5 minutes on the slower 57,600 baudrate
 
@@ -227,6 +228,7 @@ class BaseDevice:
     def get_history_data(self):
         """
         Get tidy device memory history in a list of tuples.
+
         First row is column names.
         Columns: "datetime", "count", "unit", "mode", "reference_datetime", "notes"
 
