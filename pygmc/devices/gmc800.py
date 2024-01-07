@@ -1,3 +1,4 @@
+"""GMC-800 Devices."""
 
 from ..connection import Connection
 from .device_rfc1201 import DeviceRFC1201
