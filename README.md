@@ -44,9 +44,9 @@ print(cpm)
 ```
 
 ### Devices
-| Device | Brand | Notes |
-| ------ | ----- | ----- |
-| GMC-300S ✔️ | GQ Electronics | Required lower baudrate to work |
+| Device | Brand | Notes          |
+| ------ | ----- |----------------|
+| GMC-300S ✔️ | GQ Electronics | A little picky |
 | GMC-300E+ / GMC-300E Plus | GQ Electronics |
 | GMC-320+ / GMC-320 Plus ✔️ |GQ Electronics | Works smoothly |
 | GMC-320S | GQ Electronics |

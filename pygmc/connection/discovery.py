@@ -3,7 +3,8 @@ import logging
 import re
 from collections import namedtuple
 
-# pypi
+from serial import SerialException
+
 from .connection import Connection
 from .const import BAUDRATES
 from .utils import get_gmc_usb_devices
@@ -84,7 +85,14 @@ class Discovery:
 
     def _validate_device(self, port, baudrate) -> bool:
         logger.debug(f"Checking port={port} baudrate={baudrate}")
-        conn = Connection(port=port, baudrate=baudrate, timeout=2)
+        try:
+            conn = Connection(port=port, baudrate=baudrate, timeout=2)
+        except SerialException as e:
+            # Should a convenience method log as warning/error?
+            # If only GQ Electronics would put the version/serial in USB description...
+            logger.warning(f"Skipping error connecting: {e}", exc_info=True)
+            return False
+
         info = self._get_device_info(conn)
         conn.close_connection()
         if info:
