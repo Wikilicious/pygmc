@@ -201,7 +201,15 @@ class Connection:
             logger.debug("read(in_waiting)")
             result = self._con.read(self._con.in_waiting)
 
-        logger.debug(f"response={result}")
+        if len(result) <= 50:
+            logger.debug(f"response={result}")
+        else:
+            # reading history data pollutes the logs with T.M.I.
+            # seeing response is as easy as: logging.basicConfig(level=9)
+            msg = f"response-len={len(result)} (set log level=9 to log full response)"
+            logger.debug(msg)
+            logger.log(level=9, msg=f"response={result}")
+
         return result
 
     def read_until(self, size=None, expected=b"") -> bytes:
@@ -228,7 +236,14 @@ class Connection:
         # This is to resolve pyserial breaking change. See __init__ above.
         params = {self._read_until_param_name: expected, "size": size}
         result = self._con.read_until(**params)
-        logger.debug(f"response={result}")
+        if len(result) <= 50:
+            logger.debug(f"response={result}")
+        else:
+            # reading history data pollutes the logs with T.M.I.
+            # seeing response is as easy as: logging.basicConfig(level=9)
+            msg = f"response-len={len(result)} (set log level=9 to log full response)"
+            logger.debug(msg)
+            logger.log(level=9, msg=f"response={result}")
         return result
 
     def read_at_least(self, size, wait_sleep=0.05) -> bytes:
@@ -263,8 +278,16 @@ class Connection:
         # read until size or timeout
         min_size_result = self.read_until(size=size, expected=b"")
         extra_result = self.read(wait_sleep=wait_sleep)
+        # add up results like str math
         result = min_size_result + extra_result
-        logger.debug(f"response={result}")
+
+        if len(result) <= 50:
+            logger.debug(f"combined-response={result}")
+        else:
+            msg = f"combined-response-len={len(result)} "
+            msg += "(set log level=9 to log full response)"
+            logger.debug(msg)
+            logger.log(level=9, msg=f"combined-response={result}")
         self.reset_buffers()
 
         return result
