@@ -40,21 +40,6 @@ Connect With Exact Port
 Under the hood, pygmc will connect to that exact port/dev-device/com and attempt to
 communicate with different baudrates until it gets a successful response.
 
-.. code-block:: python
-
-    def connect(
-        port=None,
-        baudrate=None,
-        vid=None,
-        pid=None,
-        description=None,
-        hardware_id="1A86:7523",
-    ):
-
-Looking at the source code we see we can also pass in the baudrate. Or leave it `None`
-so for it to be auto-determined... at the expense of time waiting for it to try
-different baudrates.
-
 
 Get DataFrame From Device History
 ---------------------------------
