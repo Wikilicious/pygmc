@@ -14,14 +14,14 @@ own tools on top of a stable package.
 - [PYPI](https://pypi.org/project/pygmc/)
 - [Documentation](https://pygmc.readthedocs.io/)
 
-### Installation 
+## Installation 
 ```shell
 pip install pygmc
 ```
 
 
-### Example Usage
-Auto discover connected GMC, auto identify baudrate, and auto select correct device.
+## Example Usage
+#### Auto discover connected GMC, auto identify baudrate, and auto select correct device.
 ```pycon
 import pygmc
 
@@ -33,7 +33,8 @@ print(ver)
 cpm = gc.get_cpm()
 print(cpm)
 ```
-Connect to specified GMC device with exact USB port/device/com.
+
+#### Connect to specified GMC device with exact USB port/device/com.
 ```pycon
 import pygmc
 
@@ -42,6 +43,24 @@ gc = pygmc.GMC320('/dev/ttyUSB0')
 cpm = gc.get_cpm()
 print(cpm)
 ```
+
+####Read device history into DataFrame
+```pycon
+import pandas as pd
+import pygmc
+
+gc = pygmc.GMC320('/dev/ttyUSB0')
+
+history = gc.get_history_data()
+df = pd.DataFrame(history[1:], columns=history[0])
+```
+| datetime            |   count | unit   | mode         | reference_datetime   | notes   |
+|:--------------------|--------:|:-------|:-------------|:---------------------|:--------|
+| 2023-04-19 20:37:18 |      11 | CPM    | every minute | 2023-04-19 20:36:18  |         |
+| 2023-04-19 20:38:18 |      20 | CPM    | every minute | 2023-04-19 20:36:18  |         |
+| 2023-04-19 20:39:18 |      19 | CPM    | every minute | 2023-04-19 20:36:18  |         |
+| 2023-04-19 20:40:18 |      23 | CPM    | every minute | 2023-04-19 20:36:18  |         |
+| 2023-04-19 20:41:18 |      20 | CPM    | every minute | 2023-04-19 20:36:18  |         |
 
 ### Devices
 | Device | Brand | Notes          |
