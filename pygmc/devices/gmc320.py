@@ -1,4 +1,4 @@
-import serial
+"""GMC-320 Devices."""
 
 from ..connection import Connection
 from .device_rfc1201 import DeviceRFC1201
@@ -30,35 +30,10 @@ class GMC320(DeviceRFC1201):
         if isinstance(connection, Connection):
             super().__init__(connection)
         elif port and isinstance(baudrate, int):
-            conn = Connection(timeout=5)
-            conn.connect(port=port, baudrate=baudrate)
+            conn = Connection(port=port, baudrate=baudrate, timeout=5)
             super().__init__(conn)
         else:
             raise ConnectionError(f"Unable to connect port={port} baudrate={baudrate}")
-
-    @staticmethod
-    def connect(port, baudrate=115200):
-        """
-        Connect to GMC-320.
-
-        Parameters
-        ----------
-        port: str
-            Exact port (device dev path / com) e.g. '/dev/ttyUSB0'.
-        baudrate: int
-            Device baudrate.
-
-        Returns
-        -------
-        GMC320
-            An gmc device with initialized connection ready to use.
-
-        """
-        usb_serial = serial.Serial(port=port, baudrate=baudrate, timeout=5)
-        connection = Connection()
-        connection.connect_user_provided(usb_serial)
-        gc = GMC320(port=None, connection=connection)
-        return gc
 
 
 class GMC320Plus(DeviceRFC1201):
@@ -87,35 +62,10 @@ class GMC320Plus(DeviceRFC1201):
         if isinstance(connection, Connection):
             super().__init__(connection)
         elif port and isinstance(baudrate, int):
-            conn = Connection(timeout=5)
-            conn.connect(port=port, baudrate=baudrate)
+            conn = Connection(port=port, baudrate=baudrate, timeout=5)
             super().__init__(conn)
         else:
             raise ConnectionError(f"Unable to connect port={port} baudrate={baudrate}")
-
-    @staticmethod
-    def connect(port, baudrate=115200):
-        """
-        Connect to GMC-320+.
-
-        Parameters
-        ----------
-        port: str
-            Exact port (device dev path / com) e.g. '/dev/ttyUSB0'.
-        baudrate: int
-            Device baudrate.
-
-        Returns
-        -------
-        GMC320Plus
-            An gmc device with initialized connection ready to use.
-
-        """
-        usb_serial = serial.Serial(port=port, baudrate=baudrate, timeout=5)
-        connection = Connection()
-        connection.connect_user_provided(usb_serial)
-        gc = GMC320Plus(port=None, connection=connection)
-        return gc
 
 
 class GMC320PlusV5(DeviceRFC1201):
@@ -144,32 +94,7 @@ class GMC320PlusV5(DeviceRFC1201):
         if isinstance(connection, Connection):
             super().__init__(connection)
         elif port and isinstance(baudrate, int):
-            conn = Connection(timeout=5)
-            conn.connect(port=port, baudrate=baudrate)
+            conn = Connection(port=port, baudrate=baudrate, timeout=5)
             super().__init__(conn)
         else:
             raise ConnectionError(f"Unable to connect port={port} baudrate={baudrate}")
-
-    @staticmethod
-    def connect(port, baudrate=115200):
-        """
-        Connect to GMC-320+V5.
-
-        Parameters
-        ----------
-        port: str
-            Exact port (device dev path / com) e.g. '/dev/ttyUSB0'.
-        baudrate: int
-            Device baudrate.
-
-        Returns
-        -------
-        GMC320PlusV5
-            An gmc device with initialized connection ready to use.
-
-        """
-        usb_serial = serial.Serial(port=port, baudrate=baudrate, timeout=5)
-        connection = Connection()
-        connection.connect_user_provided(usb_serial)
-        gc = GMC320PlusV5(port=None, connection=connection)
-        return gc

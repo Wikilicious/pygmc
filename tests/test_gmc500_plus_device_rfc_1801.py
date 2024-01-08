@@ -84,8 +84,8 @@ def test_expected_results(cmd, expected):
 
 
 def test_auto_device():
-    device = devices.auto_get_device(mock_connection)
-    assert isinstance(device, devices.DeviceRFC1801)
+    device = devices.auto_get_device_from_connection(mock_connection)
+    assert isinstance(type(device), type(devices.GMC500))
 
 
 def test_reset_buffers(capfd):

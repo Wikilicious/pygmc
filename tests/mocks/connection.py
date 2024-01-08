@@ -3,8 +3,13 @@ from pygmc import connection
 
 
 class MockConnection(connection.Connection):
+    """
+    Mock Connection class.
+    Limitation is it doesn't mock the buffer. That limits the testing of get_at_least.
+    """
+
     def __init__(self, cmd_response_map):
-        super().__init__()
+        super().__init__(port="dummy", baudrate=123, serial_connection="DUMMY")
         self._cmd_response_map = cmd_response_map
         self._cmd = None
 
@@ -15,7 +20,7 @@ class MockConnection(connection.Connection):
         self._cmd = cmd
         print(cmd)
 
-    def read(self, wait_sleep):
+    def read(self, wait_sleep=0.3):
         return self._cmd_response_map[self._cmd]
 
     def read_until(self, expected=b"", size=None):
@@ -37,3 +42,9 @@ class MockConnection(connection.Connection):
             cut_off_index = size
 
         return response[0:cut_off_index]
+
+    def read_at_least(self, size, wait_sleep=0.05) -> bytes:
+        response = self.read()
+        if size > len(response):
+            raise TimeoutError(f"{size=} > len({response=}) | would've timed out.")
+        return response
