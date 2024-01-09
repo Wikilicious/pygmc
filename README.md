@@ -44,7 +44,7 @@ cpm = gc.get_cpm()
 print(cpm)
 ```
 
-####Read device history into DataFrame
+#### Read device history into DataFrame
 ```pycon
 import pandas as pd
 import pygmc
