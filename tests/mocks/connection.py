@@ -1,4 +1,4 @@
-# from ...pygmc import connection
+from collections import defaultdict
 from pygmc import connection
 
 
@@ -12,12 +12,14 @@ class MockConnection(connection.Connection):
         super().__init__(port="dummy", baudrate=123, serial_connection="DUMMY")
         self._cmd_response_map = cmd_response_map
         self._cmd = None
+        self._cmd_calls_dict = defaultdict(int)
 
     def reset_buffers(self):
         print("reset_buffers")
 
     def write(self, cmd):
         self._cmd = cmd
+        self._cmd_calls_dict[cmd] += 1
         print(cmd)
 
     def read(self, wait_sleep=0.3):
@@ -48,3 +50,8 @@ class MockConnection(connection.Connection):
         if size > len(response):
             raise TimeoutError(f"{size=} > len({response=}) | would've timed out.")
         return response
+
+    def get_cmd_calls(self, cmd):
+        """Check if cmd was called the expected amount of times."""
+        count = self._cmd_calls_dict[cmd]
+        return count
