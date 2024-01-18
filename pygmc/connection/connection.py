@@ -117,8 +117,11 @@ class Connection:
             ports = list(
                 serial_list_ports.grep(regexp=f"^{deets_port}$", include_links=True)
             )
-        if deets_port is None and len(ports) != 1:
+        if deets_port is None:
             # port_info will be None which won't hasattr i.e. returns all None.
+            logger.warning(f"Unable to identify USB info for {deets_port}")
+        elif len(ports) != 1:
+            # ports var may not exist. The if catches that.
             logger.warning(f"Unable to identify USB info for {deets_port}")
         else:
             port_info = ports[0]
