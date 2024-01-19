@@ -4,19 +4,17 @@ import pytest
 
 import pygmc
 
-from ..data import data_gmc500_plus
+from ..data import data_gmc320
 from ..mocks import MockConnection
 
-actions_conn = MockConnection(data_gmc500_plus.actions_cmd_response_map)
-gc500 = pygmc.GMC500(port=None, baudrate=123, connection=actions_conn)
-gc500plus = pygmc.GMC500(port=None, baudrate=123, connection=actions_conn)
+actions_conn = MockConnection(data_gmc320.actions_cmd_response_map)
+gc320 = pygmc.GMC320(port=None, baudrate=123, connection=actions_conn)
+gc320plus = pygmc.GMC320Plus(port=None, baudrate=123, connection=actions_conn)
 
 
 # Do both GMC500 and GMC500+ together
-parametrize_data = [(gc500, x) for x in data_gmc500_plus.actions_device_test_cases]
-parametrize_data.extend(
-    [(gc500plus, x) for x in data_gmc500_plus.actions_device_test_cases]
-)
+parametrize_data = [(gc320, x) for x in data_gmc320.actions_device_test_cases]
+parametrize_data.extend([(gc320plus, x) for x in data_gmc320.actions_device_test_cases])
 
 
 @pytest.mark.parametrize("gc,case", parametrize_data)

@@ -13,12 +13,13 @@ from .test_gmc500_plus_device_rfc_1801 import (  # noqa: I001
     device_result_map,
 )
 import pygmc
+from pygmc.connection.const import BAUDRATES
 
 
 parametrize_data = [(k, v) for k, v in device_result_map.items()]
 
 
-def get_mock_gc():
+def get_mock_dev():
     """Lazily import mock_serial to avoid ModuleError in Windows"""
     mock_serial = pytest.importorskip("mock_serial", reason="Doesn't work on Win")
     # Mock device
@@ -30,6 +31,11 @@ def get_mock_gc():
     # We turn heartbeat off before many ops... need to instruct mock_dev to ignore
     mock_dev.stub(receive_bytes=b"<HEARTBEAT0>>", send_bytes=b"")
 
+    return mock_dev
+
+
+def get_mock_gc():
+    mock_dev = get_mock_dev()
     mock_dev_serial = Serial(mock_dev.port)
 
     connection = pygmc.connection.Connection(
@@ -45,6 +51,8 @@ def get_mock_gc():
 if not sys.platform.startswith("linux"):
     pytest.skip("skipping tests - not running linux", allow_module_level=True)
 else:
+    mock_dev = get_mock_dev()
+    mock_dev_serial = Serial(mock_dev.port)
     gc = get_mock_gc()
 
 
@@ -61,3 +69,89 @@ def test_expected_results(cmd, expected):
     print(f"{cmd=}")
     print(f"{expected=}")
     print(f"{result=}")
+
+
+def test_main_entry():
+    mock_dev = get_mock_dev()
+    gc = pygmc.connect(mock_dev.port)
+    assert gc.get_version()[0:7] == "GMC-500"
+
+
+def test_utils():
+    assert isinstance(pygmc.connection.get_gmc_usb_devices(), list)
+    assert isinstance(pygmc.connection.get_all_usb_devices(), list)
+
+
+def test_conn_details():
+    mock_dev = get_mock_dev()
+    gc = pygmc.connect(mock_dev.port)
+    deets = gc.get_connection_details()
+    print(f"conn deets: {deets}")
+
+
+def test_close_connection():
+    mock_dev = get_mock_dev()
+    mock_dev_serial = Serial(mock_dev.port)
+
+    connection = pygmc.connection.Connection(
+        port="dummy", baudrate=123, serial_connection=mock_dev_serial
+    )
+    connection.close_connection()
+    # call again to enter the if None condition
+    connection.close_connection()
+
+
+def test_str_and_repr():
+    mock_dev = get_mock_dev()
+    mock_dev_serial = Serial(mock_dev.port)
+
+    connection = pygmc.connection.Connection(
+        port="dummy", baudrate=123, serial_connection=mock_dev_serial
+    )
+    print(connection)  # test __repr__ & __str__
+
+
+def test_connection_port_method():
+    mock_dev = get_mock_dev()
+
+    pygmc.connection.Connection(port=mock_dev.port, baudrate=BAUDRATES[0])
+
+
+def test_connection_bad_baudrate():
+    # this just enters block with warning loggers
+    mock_dev = get_mock_dev()
+
+    pygmc.connection.Connection(port=mock_dev.port, baudrate=123)
+
+
+parametrize_device_conns = [
+    pygmc.GMC300,
+    pygmc.GMC300S,
+    pygmc.GMC300EPlus,
+    pygmc.GMC320,
+    pygmc.GMC320Plus,
+    pygmc.GMC320PlusV5,
+    pygmc.GMC500,
+    pygmc.GMC500Plus,
+    pygmc.GMC600,
+    pygmc.GMC600Plus,
+    pygmc.GMC800,
+]
+
+
+@pytest.mark.parametrize("dev", parametrize_device_conns)
+def test_device_connection_port_method(dev):
+    dev(mock_dev.port)
+
+
+@pytest.mark.parametrize("dev", parametrize_device_conns)
+def test_device_connection_serial_method(dev):
+    connection = pygmc.connection.Connection(port=mock_dev.port, baudrate=123)
+    dev(None, connection=connection)
+
+
+@pytest.mark.parametrize("dev", parametrize_device_conns)
+def test_device_connection_error(dev):
+    with pytest.raises(ConnectionError) as excinfo:
+        print(excinfo)
+        dev(None)

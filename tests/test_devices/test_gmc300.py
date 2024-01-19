@@ -4,18 +4,21 @@ import pytest
 
 import pygmc
 
-from ..data import data_gmc500_plus
+from ..data import data_gmc300s
 from ..mocks import MockConnection
 
-actions_conn = MockConnection(data_gmc500_plus.actions_cmd_response_map)
-gc500 = pygmc.GMC500(port=None, baudrate=123, connection=actions_conn)
-gc500plus = pygmc.GMC500(port=None, baudrate=123, connection=actions_conn)
+actions_conn = MockConnection(data_gmc300s.actions_cmd_response_map)
+# reuse data from GMC300S since we don't have a source
+gc300 = pygmc.GMC300(port=None, baudrate=123, connection=actions_conn)
+gc300s = pygmc.GMC300S(port=None, baudrate=123, connection=actions_conn)
+gc300e_plus = pygmc.GMC300EPlus(port=None, baudrate=123, connection=actions_conn)
 
 
 # Do both GMC500 and GMC500+ together
-parametrize_data = [(gc500, x) for x in data_gmc500_plus.actions_device_test_cases]
+parametrize_data = [(gc300, x) for x in data_gmc300s.actions_device_test_cases]
+parametrize_data.extend([(gc300, x) for x in data_gmc300s.actions_device_test_cases])
 parametrize_data.extend(
-    [(gc500plus, x) for x in data_gmc500_plus.actions_device_test_cases]
+    [(gc300e_plus, x) for x in data_gmc300s.actions_device_test_cases]
 )
 
 
