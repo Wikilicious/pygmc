@@ -1,9 +1,9 @@
 # PyGMC
-[![](https://img.shields.io/pypi/v/pygmc.svg)](https://pypi.org/project/pygmc/)
-[![Read the Docs](https://img.shields.io/readthedocs/pygmc)](https://pygmc.readthedocs.io/)
-[![](https://github.com/Wikilicious/pygmc/workflows/Python%20application/badge.svg)](https://github.com/Wikilicious/pygmc/actions)
-[![GitHub](https://img.shields.io/github/license/Wikilicious/pygmc)](https://github.com/Wikilicious/pygmc/blob/master/LICENSE)
-[![PyPI - Downloads](https://img.shields.io/pypi/dm/pygmc)](https://pypi.org/project/pygmc/)
+[![PyPI - Version](https://img.shields.io/pypi/v/pygmc?logo=python&color=green)](https://pypi.org/project/pygmc/)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/Wikilicious/pygmc/python-app.yml?branch=master&logo=github&label=Tests)](https://github.com/Wikilicious/pygmc/tree/master/tests)
+[![Read the Docs](https://img.shields.io/readthedocs/pygmc?logo=readthedocs)](https://pygmc.readthedocs.io/)
+[![codecov](https://codecov.io/gh/Wikilicious/pygmc/graph/badge.svg?token=9X2V5CWPDM)](https://codecov.io/gh/Wikilicious/pygmc)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/pygmc?logo=pypi)](https://pypi.org/project/pygmc/)
 
 PyGMC is a Python API for Geiger–Müller Counters (GMCs) / Geiger Counters.
 It has just one dependency (pyserial) and works on multiple operating
