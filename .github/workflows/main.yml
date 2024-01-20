@@ -1,4 +1,4 @@
-name: Tests
+name: Test Matrix
 
 on:
   push:
@@ -11,7 +11,7 @@ jobs:
   test:
     runs-on: ${{ matrix.platform }}
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
         platform:
@@ -34,16 +34,12 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v3
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   test-windows:
     # Need windows specific reqs
     runs-on: windows-latest
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     continue-on-error: ${{ matrix.python-version == '3.6' }}
