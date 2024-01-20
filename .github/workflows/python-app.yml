@@ -1,7 +1,7 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 
-name: Python application
+name: Tests
 
 on:
   push:
@@ -43,4 +43,8 @@ jobs:
         ruff --output-format=github --config=pyproject.toml .
     - name: Test with pytest
       run: |
-        pytest
+        pytest --cov=pygmc
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
