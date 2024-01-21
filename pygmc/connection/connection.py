@@ -317,7 +317,6 @@ class Connection:
         logger.debug(f"get(cmd={cmd}, wait_sleep={wait_sleep})")
         self.write(cmd)
         result = self.read(wait_sleep=wait_sleep)
-        logger.debug(f"response={result}")
         return result
 
     def get_at_least(self, cmd, size, wait_sleep=0.05) -> bytes:
@@ -349,7 +348,6 @@ class Connection:
         logger.debug(f"get(cmd={cmd}, wait_sleep={wait_sleep})")
         self.write(cmd)
         result = self.read_at_least(size=size, wait_sleep=wait_sleep)
-        logger.debug(f"response={result}")
         return result
 
     def get_exact(self, cmd, size=None, expected=b"") -> bytes:
