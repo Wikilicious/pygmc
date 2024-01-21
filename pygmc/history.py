@@ -9,24 +9,26 @@ logger = logging.getLogger(__name__)
 class HistoryParser:
     """Parse GQ GMC device history data."""
 
-    def __init__(self, data):
+    def __init__(self, data=None, filename=None):
         """
         Parse GMC flash memory saved history data.
 
         Parameters
         ----------
-        data: bytes | str | BufferedIOBase
-            Input raw bytes of history, or file path as str, or an BufferedIOBase
-            i.e. open(file, 'rb')
+        data: bytes | None
+            Input raw bytes of history
+            If left None, filename must be provided.
+        filename: str | BufferedIOBase | None
+            Path to file to open or an BufferedIOBase i.e. open(file, 'rb')
+            data takes priority over filename.
 
         """
         if isinstance(data, bytes):
             self._raw = _BinFile(data)
-        elif isinstance(data, str) and len(data) < 32_767:
-            # Ugh...
-            self._raw = open(data, "rb")
-        elif isinstance(data, BufferedIOBase):
-            self._raw = data
+        elif isinstance(filename, BufferedIOBase):
+            self._raw = filename
+        elif filename:
+            self._raw = open(filename, "rb")
         else:
             raise TypeError
 
@@ -176,6 +178,7 @@ class HistoryParser:
                 )
 
     def _parse(self):
+        """The core parser flow."""
         # The meat of the matter...
         try:
             while True:
@@ -244,6 +247,9 @@ class HistoryParser:
 
     def get_data(self):
         """Get parsed data."""
+        if self._eof_check > 0:
+            # list[:-0] is empty
+            return self._data[: -self._eof_check]
         return self._data
 
     def get_columns(self):
@@ -252,6 +258,8 @@ class HistoryParser:
 
 
 class _BinFile:
+    """A dummy class so raw bytes and BufferedIOBase can be treated the same."""
+
     def __init__(self, data):
         self.data = data
         self._i = 0

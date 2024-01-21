@@ -239,7 +239,7 @@ class BaseDevice:
 
         """
         data = self.get_raw_history()
-        h = HistoryParser(data)
+        h = HistoryParser(data=data)
         data = [h.get_columns()]
         data.extend(h.get_data())
         return data
