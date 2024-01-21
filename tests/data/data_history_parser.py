@@ -231,3 +231,10 @@ raw_history_with_notes1_tidy = [
         None,
     ),
 ]
+
+
+# Same as test above... but added
+raw_history_with_notes2 = raw_history_with_notes1 + b"".join(
+    [b"\xff" for i in range(101)]
+)
+# raw_history_with_notes2_tidy = raw_history_with_notes1_tidy.copy()

@@ -16,6 +16,11 @@ import pygmc
 from pygmc.connection.const import BAUDRATES
 
 
+if not sys.platform.startswith("linux"):
+    # TODO: can we define mock_serial after this?
+    pytest.skip("skipping tests - not running linux", allow_module_level=True)
+
+
 parametrize_data = [(k, v) for k, v in device_result_map.items()]
 
 
@@ -97,8 +102,7 @@ def test_close_connection():
         port="dummy", baudrate=123, serial_connection=mock_dev_serial
     )
     connection.close_connection()
-    # call again to enter the if None condition
-    connection.close_connection()
+    connection.close_connection()  # yes, twice
 
 
 def test_str_and_repr():
@@ -109,6 +113,10 @@ def test_str_and_repr():
         port="dummy", baudrate=123, serial_connection=mock_dev_serial
     )
     print(connection)  # test __repr__ & __str__
+    # disconnect to test super().__repr__
+    connection._con = None
+    connection.close_connection()
+    print(connection)  # test super().__repr__
 
 
 def test_connection_port_method():
@@ -155,3 +163,25 @@ def test_device_connection_error(dev):
     with pytest.raises(ConnectionError) as excinfo:
         print(excinfo)
         dev(None)
+
+
+def test_long_response_logger():
+    mock_serial = pytest.importorskip("mock_serial", reason="Doesn't work on Win")
+    mock_dev = mock_serial.MockSerial()
+    mock_dev.open()
+
+    mock_dev.stub(receive_bytes=b"<CONY>>", send_bytes=b"X" * 51)
+    mock_dev_serial = Serial(mock_dev.port)
+
+    connection = pygmc.connection.Connection(
+        port="dummy", baudrate=123, serial_connection=mock_dev_serial
+    )
+
+    # stupid... but can't wait_sleep=0 because it fails
+    # ugh, it's gonna be a non-deterministic test, fluck!
+    # passes with sleep=0.000001, pad the number for github ci actions???
+    response = connection.get(cmd=b"<CONY>>", wait_sleep=0.0005)
+    assert len(response) == 51
+
+    response = connection.get_at_least(cmd=b"<CONY>>", size=51, wait_sleep=0.0005)
+    assert len(response) == 51
