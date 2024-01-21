@@ -1,3 +1,4 @@
+import sys
 import tempfile
 
 import pytest
@@ -81,14 +82,19 @@ def test_expected_results(mock_dev, cmd, expected):
     print(f"{result=}")
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 def test_history_parser_with_file():
+    # TypeError: expected str, bytes or os.PathLike object, not _TemporaryFileWrapper
+    # Ugh, windows
     f = tempfile.TemporaryFile()
     f.write(b"\xff" * 101)
     h = pygmc.HistoryParser(filename=f)
     assert h.get_data() == []
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 def test_history_parser_with_file_path():
+    # PermissionError on Windows
     f = tempfile.NamedTemporaryFile()
     f.write(b"\xff" * 1)
     fn = f.name
