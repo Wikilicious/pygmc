@@ -8,3 +8,6 @@ __pycache__/
 
 .coverage
 docs/_build
+htmlcov
+pygmc.egg-info
+.tox
