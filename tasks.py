@@ -7,6 +7,11 @@ def test(ctx):
 
 
 @task
+def cov_report(ctx):
+    ctx.run("pytest --cov=pygmc --cov-report html .", pty=True)
+
+
+@task
 def ruff(ctx):
     ctx.run("ruff check --no-fix .", pty=True)
 
