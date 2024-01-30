@@ -19,8 +19,11 @@ own tools on top of a stable package.
 pip install pygmc
 ```
 
-
 ## Example Usage
+
+#### Jupyter Notebook
+<img src="https://github.com/Wikilicious/pygmc/blob/master/pygmc_usage_example_0.9.1.gif" width=500>
+
 #### Auto discover connected GMC, auto identify baudrate, and auto select correct device.
 ```pycon
 import pygmc
