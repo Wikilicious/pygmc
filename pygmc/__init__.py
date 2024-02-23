@@ -27,6 +27,7 @@ from pygmc.devices import (
     GMC320PlusV5,
     GMC500Plus,
     GMC600Plus,
+    GMCSE,
 )
 from pygmc.devices import (
     auto_get_device_from_discovery_details as _auto_get_device_class,
