@@ -68,6 +68,12 @@ Devices
    :show-inheritance:
    :inherited-members:
 
+.. autoclass:: pygmc.devices.GMCSE
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :inherited-members:
+
 .. autoclass:: pygmc.devices.DeviceRFC1201
    :members:
    :undoc-members:
