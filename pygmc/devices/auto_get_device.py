@@ -8,6 +8,7 @@ from .gmc320 import GMC320, GMC320Plus, GMC320PlusV5
 from .gmc500 import GMC500, GMC500Plus
 from .gmc600 import GMC600, GMC600Plus
 from .gmc800 import GMC800
+from .gmcse import GMCSE
 
 logger = logging.getLogger("pygmc.device")
 
@@ -20,6 +21,7 @@ _device_map = {
     # seemed like bigger number would use newer rfc spec until GMC-800
     # listed as RFC1201 in https://www.gqelectronicsllc.com/GMC-800UserGuide.pdf
     "GMC-800": DeviceRFC1201,
+    "GMC-SE": DeviceRFC1201,
 }
 
 
@@ -105,6 +107,14 @@ device_match_list = [
         "protocol_class": DeviceRFC1201,
         # Open Issue on PyGMC github... make a PR... Provide an example
         "version_example": "",
+    },
+    # GMCSE
+    {
+        "match_regex": r"GMC-SE",
+        "device_class": GMCSE,
+        "protocol_class": DeviceRFC1201,
+        # Open Issue on PyGMC github... make a PR... Provide an example
+        "version_example": "GMC-SE Re 1.05",
     },
 ]
 

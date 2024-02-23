@@ -12,5 +12,6 @@ from .gmc320 import GMC320, GMC320Plus, GMC320PlusV5
 from .gmc500 import GMC500, GMC500Plus
 from .gmc600 import GMC600, GMC600Plus
 from .gmc800 import GMC800
+from .gmcse import GMCSE
 
 logger = logging.getLogger("pygmc.device")
