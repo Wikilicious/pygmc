@@ -36,5 +36,5 @@ class GMCSE(DeviceRFC1201):
             raise ConnectionError(f"Unable to connect port={port} baudrate={baudrate}")
 
         # https://www.gqelectronicsllc.com/support/GMC_Selection_Guide.htm
-        self._flash_memory_size_bytes = 2**21 # 2 MiB
+        self._flash_memory_size_bytes = 2**21  # 2 MiB
         self._baudrate = baudrate
