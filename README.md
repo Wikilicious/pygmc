@@ -77,7 +77,7 @@ df = pd.DataFrame(history[1:], columns=history[0])
 | GMC-600 | GQ Electronics |
 | GMC-600+ / GMC-600 Plus | GQ Electronics |
 | GMC-800 | GQ Electronics |
-| GMC-SE | GQ Electronics | RFC1201 |
+| GMC-SE ✔️ | GQ Electronics | RFC1201 |
 
 (✔️=physically confirmed works)  
 Theoretically, any GQ GMC device following communication protocol RFC1201 or RFC1801 should work (e.g. the old GMC-280 )
@@ -86,6 +86,10 @@ Theoretically, any GQ GMC device following communication protocol RFC1201 or RFC
 ![](https://www.gqelectronicsllc.com/comersus/store/catalog/GMC-320-Plus_350.png)
 ![](https://www.gqelectronicsllc.com/comersus/store/catalog/GMC-500HV_350.png)
 
+### Contributors
+
+- ![Thomaz (Owner/Dev)](https://github.com/Wikilicious)
+- ![Huy](https://github.com/huyndao)
 
 ### Notes
 - Alternative Python projects for GQ GMC:
