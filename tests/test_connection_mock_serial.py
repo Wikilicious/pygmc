@@ -144,6 +144,7 @@ parametrize_device_conns = [
     pygmc.GMC600,
     pygmc.GMC600Plus,
     pygmc.GMC800,
+    pygmc.GMCSE,
 ]
 
 
