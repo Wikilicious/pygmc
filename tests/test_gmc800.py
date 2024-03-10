@@ -6,7 +6,6 @@ from pygmc import devices
 
 from .mocks import MockConnection
 
-
 cmd_response_map = {
     b"<GETVER>>": b"GMC-800Re1.08",
     b"<GETSERIAL>>": b"\x03\x00H671\x06",
