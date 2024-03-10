@@ -71,30 +71,32 @@ Supported Devices
 +----------------------------+----------------+---------------------------------------------------------------+
 | Device                     | Brand          | Notes                                                         |
 +============================+================+===============================================================+
-| GMC-300S ✔️                 | GQ Electronics | USB-C                                                         |
+| GMC-300S ✔️✔️                | GQ Electronics | USB-C                                                         |
 +----------------------------+----------------+---------------------------------------------------------------+
 | GMC-300E+ / GMC-300E Plus  | GQ Electronics |                                                               |
 +----------------------------+----------------+---------------------------------------------------------------+
-| GMC-320+ / GMC-320 Plus ✔️  | GQ Electronics | Works smoothly                                                |
+| GMC-320+ / GMC-320 Plus ✔️✔️ | GQ Electronics | Works smoothly                                                |
 +----------------------------+----------------+---------------------------------------------------------------+
 | GMC-320S                   | GQ Electronics |                                                               |
 +----------------------------+----------------+---------------------------------------------------------------+
 | GMC-500                    | GQ Electronics |                                                               |
 +----------------------------+----------------+---------------------------------------------------------------+
-| GMC-500+ / GMC-500 Plus ✔️  | GQ Electronics | Works smoothly                                                |
+| GMC-500+ / GMC-500 Plus ✔️✔️ | GQ Electronics | Works smoothly                                                |
 +----------------------------+----------------+---------------------------------------------------------------+
 | GMC-600                    | GQ Electronics |                                                               |
 +----------------------------+----------------+---------------------------------------------------------------+
 | GMC-600+ / GMC-600 Plus    | GQ Electronics |                                                               |
 +----------------------------+----------------+---------------------------------------------------------------+
-| GMC-800                    | GQ Electronics |                                                               |
+| GMC-800 ✔️✔️                 | GQ Electronics |                                                               |
 +----------------------------+----------------+---------------------------------------------------------------+
-| GMC-SE                     | GQ Electronics | USB-C; gyro gives numeric output however not sure if sensical |
+| GMC-SE ✔️                   | GQ Electronics | USB-C; gyro gives numeric output however not sure if sensical |
 +----------------------------+----------------+---------------------------------------------------------------+
 
-(✔️=physically confirmed works)
-Theoretically, any GQ GMC device following communication protocol RFC1201 or RFC1801
-should work (e.g. the old GMC-280 )
+✔️✔️=physically confirmed works
+
+✔️=user confirmed works
+
+*Incorrect documentation caused incorrect implementation with `pygmc<=0.10.0`
 
 
 .. image:: https://www.gqelectronicsllc.com/comersus/store/catalog/300s%20main.jpg

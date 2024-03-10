@@ -66,21 +66,22 @@ df = pd.DataFrame(history[1:], columns=history[0])
 | 2023-04-19 20:41:18 |      20 | CPM    | every minute | 2023-04-19 20:36:18  |         |
 
 ### Devices
-| Device | Brand | Notes          |
-| ------ | ----- |----------------|
-| GMC-300S ✔️ | GQ Electronics | A little picky |
-| GMC-300E+ / GMC-300E Plus | GQ Electronics |
-| GMC-320+ / GMC-320 Plus ✔️ |GQ Electronics | Works smoothly |
-| GMC-320S | GQ Electronics |
-| GMC-500 | GQ Electronics |
-| GMC-500+ / GMC-500 Plus ✔️ | GQ Electronics | Works smoothly |
-| GMC-600 | GQ Electronics |
-| GMC-600+ / GMC-600 Plus | GQ Electronics |
-| GMC-800 | GQ Electronics |
-| GMC-SE ✔️ | GQ Electronics | RFC1201 |
+| Device                     | Brand | Notes          |
+|----------------------------| ----- |----------------|
+| GMC-300S ✔️✔️                | GQ Electronics | A little picky |
+| GMC-300E+ / GMC-300E Plus  | GQ Electronics |
+| GMC-320+ / GMC-320 Plus ✔️✔️ |GQ Electronics | Works smoothly |
+| GMC-320S                   | GQ Electronics |
+| GMC-500                    | GQ Electronics |
+| GMC-500+ / GMC-500 Plus ✔️✔️ | GQ Electronics | Works smoothly |
+| GMC-600                    | GQ Electronics |
+| GMC-600+ / GMC-600 Plus    | GQ Electronics |
+| GMC-800 ✔️✔️                   | GQ Electronics | *Finally Working |
+| GMC-SE ✔️                  | GQ Electronics | RFC1201 |
 
-(✔️=physically confirmed works)  
-Theoretically, any GQ GMC device following communication protocol RFC1201 or RFC1801 should work (e.g. the old GMC-280 )
+✔️✔️=physically confirmed works  
+✔️=user confirmed works  
+*Incorrect documentation caused incorrect implementation with `pygmc<=0.10.0`
 
 ![](https://www.gqelectronicsllc.com/comersus/store/catalog/300s%20main.jpg)
 ![](https://www.gqelectronicsllc.com/comersus/store/catalog/GMC-320-Plus_350.png)
