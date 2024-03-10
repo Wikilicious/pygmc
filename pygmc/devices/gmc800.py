@@ -1,10 +1,10 @@
 """GMC-800 Devices."""
 
 from ..connection import Connection
-from .device_rfc1201 import DeviceRFC1201
+from .device_spec404 import DeviceSpec404
 
 
-class GMC800(DeviceRFC1201):
+class GMC800(DeviceSpec404):
     """GMC-800"""
 
     def __init__(
@@ -36,3 +36,5 @@ class GMC800(DeviceRFC1201):
             raise ConnectionError(f"Unable to connect port={port} baudrate={baudrate}")
         # seemed like bigger number would use newer rfc spec until GMC-800
         # listed as RFC1201 in https://www.gqelectronicsllc.com/GMC-800UserGuide.pdf
+        # https://www.gqelectronicsllc.com/forum/topic.asp?TOPIC_ID=10394
+        # The device uses a non-published spec.

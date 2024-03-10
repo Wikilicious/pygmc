@@ -3,6 +3,7 @@ import re
 
 from .device_rfc1201 import DeviceRFC1201
 from .device_rfc1801 import DeviceRFC1801
+from .device_spec404 import DeviceSpec404
 from .gmc300 import GMC300, GMC300S, GMC300EPlus
 from .gmc320 import GMC320, GMC320Plus, GMC320PlusV5
 from .gmc500 import GMC500, GMC500Plus
@@ -104,9 +105,8 @@ device_match_list = [
     {
         "match_regex": r"GMC-800",
         "device_class": GMC800,
-        "protocol_class": DeviceRFC1201,
-        # Open Issue on PyGMC github... make a PR... Provide an example
-        "version_example": "",
+        "protocol_class": DeviceSpec404,
+        "version_example": "GMC-800Re1.08",  # Thomaz owned device example
     },
     # GMCSE
     {
