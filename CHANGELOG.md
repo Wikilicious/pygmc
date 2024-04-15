@@ -1,6 +1,8 @@
 # PyGMC - Change Log
 
 ## Unreleased
+
+## 0.11.0 (Apr-04-15)
 - Bug fix: get_usv_h() now considers all calibration points.
   - Via interpreted empirical data. (Tedious process)
   - https://www.gqelectronicsllc.com/forum/topic.asp?TOPIC_ID=10435
