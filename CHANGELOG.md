@@ -1,6 +1,10 @@
 # PyGMC - Change Log
 
 ## Unreleased
+- Bug fix: get_usv_h() now considers all calibration points.
+  - Via interpreted empirical data. (Tedious process)
+  - https://www.gqelectronicsllc.com/forum/topic.asp?TOPIC_ID=10435
+  - Possible edge cases not yet considered due to lacking documentation & dev burnout.
 
 ## 0.11.0 (2024-03-09)
 - GMC-800 now supported! (This time it's working)

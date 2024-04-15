@@ -24,6 +24,9 @@ class BaseDevice:
         # the config under the hood, initialize empty and lazily create
         self._config = dict()
 
+        # µSv calibration (max_cpm, slope, intercept)
+        self._usv_calibration_tuple = tuple()
+
         # Best effort interpretation from:
         #     https://www.gqelectronicsllc.com/forum/topic.asp?TOPIC_ID=4948
         # self-documenting code to interpret config data
@@ -132,7 +135,7 @@ class BaseDevice:
         self.connection.write(b"<HEARTBEAT1>>")
         logger.debug("Heartbeat ON")
 
-    def _read_history_position(self, start_position, chunk_size):
+    def _read_history_position(self, start_position, chunk_size) -> bytes:
         # http://www.gqelectronicsllc.com/forum/topic.asp?TOPIC_ID=4445
         # don't need spir fix because... reset read/write buffer.
         start_s = struct.pack(">I", start_position)[1:]
@@ -179,7 +182,55 @@ class BaseDevice:
 
             self._config[name] = value
 
-    def get_raw_history(self):
+    def _set_usv_calibration(self, calibrations: list) -> None:
+        """
+        Set µSv calibration from config.
+        See https://www.gqelectronicsllc.com/forum/topic.asp?TOPIC_ID=10435
+        User can convert Sievert (an SI unit of ionizing radiation) to Roentgen
+        (a legacy/retired/deprecated unit of ionizing radiation)
+
+        Parameters
+        ----------
+        calibrations: list
+            List of tuples(int, float|int) representing max_cpm and uSv.
+
+        Returns
+        -------
+        None
+
+        """
+        usv_range_slope_intercept = []  # max_cpm, slope, intercept
+
+        # insert dummy calibration point to generalize to y=mx+b
+        calibrations.insert(0, (0, 0))
+
+        for i in range(len(calibrations) - 1):
+            # *_s = start *_e = end
+            calib_s = calibrations[i]
+            calib_e = calibrations[i + 1]
+            logger.debug(f"calib_s={calib_s} calib_e={calib_e}")
+
+            cpm_s = calib_s[0]
+            usv_s = calib_s[1]
+
+            cpm_e = calib_e[0]
+            usv_e = calib_e[1]
+
+            dy = usv_e - usv_s
+            dx = cpm_e - cpm_s
+
+            m = dy / dx  # slope
+            b = -(m * cpm_e) + usv_e  # intercept
+
+            # The previous calib may have a max_cpm larger than the current one
+            # This is actually the case in the default calibration for GMC-500+
+            if cpm_e > cpm_s:
+                calib = (cpm_e, m, b)
+                usv_range_slope_intercept.append(calib)
+
+        self._usv_calibration_tuple = tuple(usv_range_slope_intercept)
+
+    def get_raw_history(self) -> bytes:
         """
         Get device history data.
 
@@ -211,7 +262,7 @@ class BaseDevice:
 
         return hist
 
-    def save_history(self, file_path):
+    def save_history(self, file_path) -> None:
         """
         Download device memory history and save to file.
 
@@ -225,7 +276,7 @@ class BaseDevice:
         with open(file_path, "wb") as f:
             f.write(data)
 
-    def get_history_data(self):
+    def get_history_data(self) -> list:
         """
         Get tidy device memory history in a list of tuples.
 
@@ -268,7 +319,7 @@ class BaseDevice:
         result = self.connection.get_exact(cmd, size=7)
         return result.hex()
 
-    def get_connection_details(self):
+    def get_connection_details(self) -> dict:
         """
         Get connection details from pyserial.
 

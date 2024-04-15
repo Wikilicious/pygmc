@@ -110,11 +110,27 @@ class DeviceRFC1801(BaseDevice):
         if not self._config:
             self.get_config()
 
-        # Not 100% sure on this...
-        # µSv/h = (CPM / CalibrationCPM_1) * Calibration_uSv_1
-        usv_h = (self.get_cpm() / self._config["CalibrationCPM_1"]) * self._config[
-            "Calibration_uSv_1"
-        ]
+        if not self._usv_calibration_tuple:
+            calibrations = [
+                (self._config["CalibrationCPM_0"], self._config["Calibration_uSv_0"]),
+                (self._config["CalibrationCPM_1"], self._config["Calibration_uSv_1"]),
+                (self._config["CalibrationCPM_2"], self._config["Calibration_uSv_2"]),
+            ]
+            self._set_usv_calibration(calibrations)
+
+        cpm = self.get_cpm()
+        usv_h = None
+        for calib in self._usv_calibration_tuple:
+            calib_max_cpm, calib_slope, calib_intercept = calib
+            if cpm <= calib_max_cpm:
+                usv_h = cpm * calib_slope + calib_intercept
+
+        # if usv is still None... extrapolate from last _usv_calibration_tuple point
+        # which is implicitly the highest cpm calibration via _set_usv_calibration
+        if usv_h is None:
+            calib_max_cpm, calib_slope, calib_intercept = self._usv_calibration_tuple[-1]
+            usv_h = cpm * calib_slope + calib_intercept
+
         return usv_h
 
     def get_cps(self) -> int:
