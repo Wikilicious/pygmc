@@ -9,6 +9,8 @@ logger = logging.getLogger("pygmc.devices.spec404")
 
 
 class DeviceSpec404(BaseDevice):
+    """Device class representing an un-documented Spec"""
+
     def __init__(self, connection):
         """
         Represent a GMC device that doesn't follow RFC1201 nor RFC1801.
