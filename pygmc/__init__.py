@@ -6,7 +6,7 @@ pypi: https://pypi.org/project/pygmc/
 readthedocs: https://pygmc.readthedocs.io/
 Thomaz - 2023
 """
-__version__ = "0.11.2"
+__version__ = "0.12.0"
 __author__ = "Thomaz"
 __license__ = "MIT"
 

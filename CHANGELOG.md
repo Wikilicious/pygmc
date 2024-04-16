@@ -1,6 +1,8 @@
 # PyGMC - Change Log
 
 ## Unreleased
+
+## 0.12.0 (2024-04-16)
 - Added save_history_csv()
   - Useful for those wanting to plot their data in Excel. 
 - Renamed 'save_history()' to 'save_history_raw()'
