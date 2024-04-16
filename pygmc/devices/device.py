@@ -1,3 +1,4 @@
+import csv
 import logging
 import struct
 
@@ -7,6 +8,8 @@ logger = logging.getLogger("pygmc.device")
 
 
 class BaseDevice:
+    """Base device class which all devices inherit from."""
+
     def __init__(self, connection):
         """
         Represent a base GMC device.
@@ -185,6 +188,7 @@ class BaseDevice:
     def _set_usv_calibration(self, calibrations: list) -> None:
         """
         Set µSv calibration from config.
+
         See https://www.gqelectronicsllc.com/forum/topic.asp?TOPIC_ID=10435
         User can convert Sievert (an SI unit of ionizing radiation) to Roentgen
         (a legacy/retired/deprecated unit of ionizing radiation)
@@ -262,9 +266,9 @@ class BaseDevice:
 
         return hist
 
-    def save_history(self, file_path) -> None:
+    def save_history_raw(self, file_path) -> None:
         """
-        Download device memory history and save to file.
+        Save raw device history to file.
 
         Parameters
         ----------
@@ -294,6 +298,22 @@ class BaseDevice:
         data = [h.get_columns()]
         data.extend(h.get_data())
         return data
+
+    def save_history_csv(self, file_path: str) -> None:
+        """
+        Save device history as a CSV file.
+
+        Parameters
+        ----------
+        file_path: str
+            Path to save.
+
+        """
+        data = self.get_history_data()
+
+        with open(file_path, "w", newline="") as csvfile:
+            csv_writer = csv.writer(csvfile, delimiter=",")
+            csv_writer.writerows(data)
 
     def get_version(self) -> str:
         """
