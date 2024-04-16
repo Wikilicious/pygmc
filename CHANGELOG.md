@@ -1,6 +1,9 @@
 # PyGMC - Change Log
 
 ## Unreleased
+- Bug fix: get_usv_h()
+  - Added test cases for edge cases.
+- Added test cases for GMC800
 
 ## 0.11.2 (2024-04-15)
 - Bug fix: get_usv_h() now considers all calibration points.
