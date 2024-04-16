@@ -21,6 +21,15 @@ cmd_response_map = {
 
 
 device_result_map = {
+    "get_cpm": 2495,
+    "get_cps": 39,
+    "get_datetime": datetime.datetime(2024, 3, 9, 15, 33, 58),
+    "get_serial": "03004836373106",
+    "get_usv_h": 16.222366710013002,
+    "get_version": "GMC-800Re1.08",
+    "power_on": None,
+    "power_off": None,
+    "reboot": None,
     "get_config": {
         "Power": 0,
         "Save_Mode": 1,
@@ -48,15 +57,6 @@ device_result_map = {
         "Alarm_CPM": 100,
         "Theme": 0,
     },
-    "get_cpm": 2495,
-    "get_cps": 39,
-    "get_datetime": datetime.datetime(2024, 3, 9, 15, 33, 58),
-    "get_serial": "03004836373106",
-    "get_usv_h": 16.222366710013002,
-    "get_version": "GMC-800Re1.08",
-    "power_on": None,
-    "power_off": None,
-    "reboot": None,
 }
 
 
