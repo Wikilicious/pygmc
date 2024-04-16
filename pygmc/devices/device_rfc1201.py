@@ -121,10 +121,8 @@ class DeviceRFC1201(BaseDevice):
         usv_h = None
         for calib in self._usv_calibration_tuple:
             calib_max_cpm, calib_slope, calib_intercept = calib
-            print(f"{cpm=} {calib=}")
             if cpm <= calib_max_cpm:
                 usv_h = cpm * calib_slope + calib_intercept
-                print(f"{usv_h=}")
                 # valid range calibration exit condition
                 break
 

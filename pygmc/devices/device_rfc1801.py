@@ -124,6 +124,7 @@ class DeviceRFC1801(BaseDevice):
             calib_max_cpm, calib_slope, calib_intercept = calib
             if cpm <= calib_max_cpm:
                 usv_h = cpm * calib_slope + calib_intercept
+                break
 
         # if usv is still None... extrapolate from last _usv_calibration_tuple point
         # which is implicitly the highest cpm calibration via _set_usv_calibration
