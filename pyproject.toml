@@ -169,4 +169,4 @@ filename = "docs/conf.py"
 [[tool.bumpversion.files]]
 filename = "CHANGELOG.md"
 search = "## Unreleased"
-replace = "## Unreleased\n\n## {current_version} ({now:%b-%m-%d})"
+replace = "## Unreleased\n\n## {new_version} ({now:%Y-%m-%d})"
