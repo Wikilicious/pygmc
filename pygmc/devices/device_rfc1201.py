@@ -9,6 +9,8 @@ logger = logging.getLogger("pygmc.devices.rfc1201")
 
 
 class DeviceRFC1201(BaseDevice):
+    """Device class representing Spec RFC1201"""
+
     def __init__(self, connection):
         """
         Represent a GMC device.
