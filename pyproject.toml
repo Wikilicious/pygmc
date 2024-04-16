@@ -83,7 +83,7 @@ target-version = "py311"
 
 [tool.ruff.lint]
 # B=bugbear - suggestions
-# D=pycodestyle - Documentation - todo
+# D=pycodestyle - Documentation
 # E=pycodestyle
 # F=Pyflakes
 # I=isort linter
@@ -93,7 +93,7 @@ target-version = "py311"
 # TRY=tryceratops (exception handling linter)
 # UP=pyupgrade - todo future date
 # W=pycodestyle
-select = ["E", "F", "I", "N", "PLE", "S", "TRY", "W"]
+select = ["E", "F", "I", "N", "PLE", "S", "TRY", "W", "D"]
 ignore = [
     # line-length - ignoring because if black cant change it, perhaps it is more readable
     "E501",
@@ -105,7 +105,6 @@ ignore = [
     "D212",
     # Temporary ignore - todo add
     "D100",
-    "D101",  # priority add
     "D104",
     "D400",
     "D401",
@@ -138,7 +137,8 @@ line-ending = "auto"
 
 [tool.ruff.per-file-ignores]
 "__init__.py" = ["F401"]
-"tests/*" = ["S101"]
+"tests/*" = ["S101", "D"]
+"tasks.py" = ["D"]
 
 
 [tool.bumpversion]
