@@ -4,6 +4,7 @@
 [![Read the Docs](https://img.shields.io/readthedocs/pygmc?logo=readthedocs)](https://pygmc.readthedocs.io/)
 [![codecov](https://codecov.io/gh/Wikilicious/pygmc/graph/badge.svg?token=9X2V5CWPDM)](https://codecov.io/gh/Wikilicious/pygmc)
 [![PyPI - Downloads](https://img.shields.io/pypi/dm/pygmc?logo=pypi)](https://pypi.org/project/pygmc/)
+[![PyPI](https://img.shields.io/pepy/dt/pygmc?logo=python&label=Total%20Downloads)](https://pypi.org/project/pygmc/)
 
 PyGMC is a Python API for Geiger–Müller Counters (GMCs) / Geiger Counters.
 It has just one dependency (pyserial) and works on multiple operating
