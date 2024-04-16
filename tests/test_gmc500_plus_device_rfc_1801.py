@@ -93,3 +93,79 @@ def test_reset_buffers(capfd):
     mock_device.get_config()
     out, err = capfd.readouterr()
     assert "reset_buffers" in out
+
+
+# uSv Tests
+config_calib0 = {
+    "CalibrationCPM_0": 100,
+    "CalibrationCPM_1": 200,
+    "CalibrationCPM_2": 300,
+    "Calibration_uSv_0": 1,
+    "Calibration_uSv_1": 10,
+    "Calibration_uSv_2": 100,
+}
+
+# Tests edge case of non-increasing config cpm
+config_calib1 = {
+    "CalibrationCPM_0": 100,
+    "CalibrationCPM_1": 25,
+    "CalibrationCPM_2": 300,
+    "Calibration_uSv_0": 1,
+    "Calibration_uSv_1": 55,
+    "Calibration_uSv_2": 100,
+}
+
+# Tests edge case of last config not being the largest (GMC-500+ default is like this)
+config_calib2 = {
+    "CalibrationCPM_0": 100,
+    "CalibrationCPM_1": 30000,
+    "CalibrationCPM_2": 25,
+    "Calibration_uSv_0": 0.6499999761581421,
+    "Calibration_uSv_1": 195.0,
+    "Calibration_uSv_2": 4.849999904632568,
+}
+
+parametrize_calib_data = [
+    # config, cpm, expected_result
+    (config_calib0, 10, 0.1),
+    (config_calib0, 100, 1),
+    (config_calib0, 101, 1.0899999999999999),
+    (config_calib0, 150, 5.5),
+    (config_calib0, 200, 10),
+    (config_calib0, 201, 10.900000000000006),
+    (config_calib0, 250, 55),
+    (config_calib0, 299, 99.10000000000002),
+    (config_calib0, 300, 100),
+    (config_calib0, 350, 145),  # tests extrapolation
+    # edge cases
+    (config_calib1, 25, 0.25),
+    (config_calib1, 99, 0.99),
+    (config_calib1, 101, 67.43636363636364),
+    (config_calib1, 250, 91.81818181818181),
+    (config_calib1, 300, 100),
+    (config_calib1, 350, 108.18181818181819),
+    # more edge cases
+    (config_calib2, 50, 0.32499998807907104),
+    (config_calib2, 1210, 7.864999977043251),
+    (config_calib2, 20000, 129.99999999202615),
+    (config_calib2, 30000, 195),
+    (config_calib2, 35000, 227.50000000398694),
+]
+
+
+@pytest.mark.parametrize("calib_config,cpm,expected", parametrize_calib_data)
+def test_usv(calib_config, cpm, expected):
+    cmd_response_map_usv = {}
+    mock_connection_usv = MockConnection(cmd_response_map_usv)
+
+    # Use our fake/mock connection in our real device class
+    mock_device_usv = devices.DeviceRFC1801(mock_connection_usv)
+
+    mock_device_usv._config = calib_config
+
+    print(f"{cpm=} {expected=} | {calib_config=}")
+
+    mock_device_usv.get_cpm = lambda: cpm
+    usv = mock_device_usv.get_usv_h()
+
+    assert usv == expected
