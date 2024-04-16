@@ -214,6 +214,12 @@ class DeviceRFC1201(BaseDevice):
         """
         Get device temperature in Celsius.
 
+        Notes
+        -----
+        Seems a bit temperamental. GMC-300S initially returned 0, then 86, then
+        stabilized to 20.7 (which is about the room temperature when measured).
+        i.e. call the method a few times until it stabilizes.
+
         Returns
         -------
         float
