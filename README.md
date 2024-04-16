@@ -75,7 +75,7 @@ df = pd.DataFrame(history[1:], columns=history[0])
 | GMC-500                    | GQ Electronics |
 | GMC-500+ / GMC-500 Plus ✔️✔️ | GQ Electronics | Works smoothly |
 | GMC-600                    | GQ Electronics |
-| GMC-600+ / GMC-600 Plus    | GQ Electronics |
+| GMC-600+ / GMC-600 Plus ✔️✔️ | GQ Electronics |
 | GMC-800 ✔️✔️                   | GQ Electronics | *Finally Working |
 | GMC-SE ✔️                  | GQ Electronics | RFC1201 |
 
