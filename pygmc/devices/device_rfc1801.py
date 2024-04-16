@@ -389,9 +389,9 @@ class DeviceRFC1801(BaseDevice):
         if not datetime_:
             datetime_ = datetime.datetime.now()
 
-        if datetime_.year < 2000:
+        if datetime_.year < 2000 or datetime_.year >= 3000:
             # welp... device has year hardcoded 20xx
-            raise ValueError("Device can't set year earlier than 2000")
+            raise ValueError("Device has year hardcoded 20xx can't set given year.")
 
         dt_cmd = struct.pack(
             ">BBBBBB",
