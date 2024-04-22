@@ -436,7 +436,7 @@ class DeviceRFC1801(BaseDevice):
             raise RuntimeError("Unexpected response: {}".format(result))
 
     def set_wifi_ssid(self, ssid, bytes_encoding: str = "utf8") -> None:
-        """
+        r"""
         Set WiFi SSID (Access point name)
 
         Parameters
@@ -460,7 +460,7 @@ class DeviceRFC1801(BaseDevice):
             raise RuntimeError("Unexpected response: {}".format(result))
 
     def set_wifi_password(self, password=None, bytes_encoding: str = "utf8"):
-        """
+        r"""
         Set WiFi password
 
         Parameters
@@ -492,7 +492,7 @@ class DeviceRFC1801(BaseDevice):
             raise RuntimeError("Unexpected response: {}".format(result))
 
     def set_gmcmap_user_id(self, user_id: str) -> None:
-        """
+        r"""
         Set User-Id for gmcmap.com
 
         See: https://gmcmap.com/
@@ -515,7 +515,7 @@ class DeviceRFC1801(BaseDevice):
             raise RuntimeError("Unexpected response: {}".format(result))
 
     def set_gmcmap_counter_id(self, counter_id: str):
-        """
+        r"""
         Set Counter-Id for currently connected GQ GMC for gmcmap.com
 
         Parameters
