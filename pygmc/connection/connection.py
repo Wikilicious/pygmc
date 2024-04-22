@@ -158,7 +158,7 @@ class Connection:
         logger.debug("reset_output_buffer")
         self._con.reset_output_buffer()
 
-    def write(self, cmd: bytes) -> None:
+    def write(self, cmd: bytes, log: bool = True) -> None:
         """
         Write command to device.
 
@@ -166,8 +166,14 @@ class Connection:
         ----------
         cmd : bytes
             Write command e.g. <GETVER>>
+        log : bool
+            Default=True to log cmd at debug level. Set false when writing sensitive
+            information such as WiFi password.
         """
-        logger.debug(f"write='{cmd}'")
+        if log:
+            logger.debug(f"write='{cmd}'")
+        else:
+            logger.debug("writing cmd")
         self._con.write(cmd)
         self._con.flush()
 
@@ -319,7 +325,7 @@ class Connection:
         result = self.read(wait_sleep=wait_sleep)
         return result
 
-    def get_at_least(self, cmd, size, wait_sleep=0.05) -> bytes:
+    def get_at_least(self, cmd: bytes, size: int, wait_sleep=0.05) -> bytes:
         """
         Write cmd, read at least <size> bytes then wait <wait_sleep> and read the buffer.
 
