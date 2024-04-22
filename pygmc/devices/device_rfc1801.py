@@ -1,4 +1,5 @@
 import datetime
+import getpass
 import logging
 import struct
 from typing import Generator, Tuple
@@ -419,3 +420,117 @@ class DeviceRFC1801(BaseDevice):
         """
         cmd = b"<REBOOT>>"
         self.connection.write(cmd)
+
+    def set_wifi_on(self) -> None:
+        """Set WiFi On"""
+        cmd = b"<WiFiON>>"
+        result = self.connection.get_exact(cmd, size=1)
+        if result != b"\xaa":
+            raise RuntimeError("Unexpected response: {}".format(result))
+
+    def set_wifi_off(self) -> None:
+        """Set WiFi Off"""
+        cmd = b"<WiFiOFF>>"
+        result = self.connection.get_exact(cmd, size=1)
+        if result != b"\xaa":
+            raise RuntimeError("Unexpected response: {}".format(result))
+
+    def set_wifi_ssid(self, ssid, bytes_encoding: str = "utf8") -> None:
+        """
+        Set WiFi SSID (Access point name)
+
+        Parameters
+        ----------
+        ssid: str
+            WiFi SSID access point name.
+        bytes_encoding: str
+            Encoding to cast to bytes. Realize it's not about the WiFi spec it's about
+            the GQ & ESP8266 spec. (undocumented in GQ-RFC1801)
+
+        Raises
+        ------
+        RuntimeError:
+            GQ spec specifies a b"\xaa" response for success.
+            RuntimeError for Unexpected response.
+
+        """
+        cmd = b"<SETSSID" + bytes(ssid, encoding=bytes_encoding) + b">>"
+        result = self.connection.get_exact(cmd, size=1)
+        if result != b"\xaa":
+            raise RuntimeError("Unexpected response: {}".format(result))
+
+    def set_wifi_password(self, password=None, bytes_encoding: str = "utf8"):
+        """
+        Set WiFi password
+
+        Parameters
+        ----------
+        password: str | None
+            Set WiFi password. Default=None prompts the user with interactive Python
+            built-in getpass; to discretely input the variable. Optionally, the user can
+            use the parameter to set the variable with their own method.
+        bytes_encoding: str
+            Encoding to cast to bytes. Realize it's not about the WiFi spec it's about
+            the GQ & ESP8266 spec. (undocumented in GQ-RFC1801)
+
+        Raises
+        ------
+        RuntimeError:
+            GQ spec specifies a b"\xaa" response for success.
+            RuntimeError for Unexpected response.
+
+        """
+        if password is None:
+            # enter password via Python's getpass built-in library
+            password = getpass.getpass()
+        cmd = b"<SETWIFIPW" + bytes(password, encoding=bytes_encoding) + b">>"
+        # don't log usb write command
+        self.connection.write(cmd, log=False)
+        # confirm success
+        result = self.connection.read_until(size=1)
+        if result != b"\xaa":
+            raise RuntimeError("Unexpected response: {}".format(result))
+
+    def set_gmcmap_user_id(self, user_id: str) -> None:
+        """
+        Set User-Id for gmcmap.com
+
+        See: https://gmcmap.com/
+
+        Parameters
+        ----------
+        user_id: str
+            User-Id on gmcmap.com
+
+        Raises
+        ------
+        RuntimeError:
+            GQ spec specifies a b"\xaa" response for success.
+            RuntimeError for Unexpected response.
+
+        """
+        cmd = b"<SETUSERID" + bytes(user_id, encoding="utf8") + b">>"
+        result = self.connection.get_exact(cmd, size=1)
+        if result != b"\xaa":
+            raise RuntimeError("Unexpected response: {}".format(result))
+
+    def set_gmcmap_counter_id(self, counter_id: str):
+        """
+        Set Counter-Id for currently connected GQ GMC for gmcmap.com
+
+        Parameters
+        ----------
+        counter_id: str
+            Counter-Id for gmcmap.com
+
+        Raises
+        ------
+        RuntimeError:
+            GQ spec specifies a b"\xaa" response for success.
+            RuntimeError for Unexpected response.
+
+        """
+        cmd = b"<SETCOUNTERID" + bytes(counter_id, encoding="utf8") + b">>"
+        result = self.connection.get_exact(cmd, size=1)
+        if result != b"\xaa":
+            raise RuntimeError("Unexpected response: {}".format(result))
