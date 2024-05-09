@@ -7,10 +7,13 @@ logger = logging.getLogger("pygmc.connection.udev_rule_check")
 
 
 class UDevRuleCheck:
+    """Check for offending Ubuntu udev rule blocking access to the GMC."""
+
     def __init__(self):
+        """User troubleshooting class to identify offending Ubuntu udev rules."""
         # path to do .rglob on
         self._main_udev_rules_dir = Path("/usr/lib/udev/")
-        # other possible paths
+        # other possible paths - perhaps future expanded udev rule check?
         self._other_udev_rules_dirs = [
             Path("/etc/udev/rules.d"),
             Path("/lib/udev/rules.d"),
@@ -21,7 +24,7 @@ class UDevRuleCheck:
         self._brltty_path_glob = "*brltty*"
         # the \n in front is because re.search and we want to match the line
         # if it's not commented out
-        self._brltty_re = '\nENV{PRODUCT}=="1a86/7523/\*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"'
+        self._brltty_re = 'ENV{PRODUCT}=="1a86/7523/\*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"'
 
         self._brltty_user_msg = """
         There is a linux 'udev' rule matching a GQ GMC device that is blocking the GMC
@@ -37,72 +40,22 @@ class UDevRuleCheck:
             - Most commonly found in: /usr/lib/udev/rules.d/85-brltty.rules
         """
 
-    @staticmethod
-    def finditer_with_line_numbers(pattern: str, paths, flags: int = 0):
-        """
-        Get (path, lineno, re-match) from a list of files and pattern.
-
-        Parameters
-        ----------
-        pattern: str
-            The regex pattern.
-        paths: list
-            List of pathlib.Path - paths to search for regex.
-        flags: int
-            Python re flags
-
-        Returns
-        -------
-        generator
-            Tuple of (path, lineno, re-match)
-
-        """
-        # modified copy from
-        # https://stackoverflow.com/questions/16673778/python-regex-match-in-multiline-but-still-want-to-get-the-line-number
-
-        if len(paths) == 0:
-            return []
-
-        for path in paths:
-            if not path.exists():
-                continue
-            if not path.is_file():
-                continue
-
-            try:
-                string = path.read_text(encoding="utf8")
-            except UnicodeError as e:  # noqa
-                continue
-
-            matches = list(re.finditer(pattern, string, flags))
-            if not matches:
-                continue
-
-            end = matches[-1].start()
-            # -1 so a failed 'rfind' maps to the first line.
-            newline_table = {-1: 0}
-            for i, m in enumerate(re.finditer("\\n", string), 1):
-                # Don't find newlines past our last match.
-                offset = m.start()
-                if offset > end:
-                    break
-                newline_table[offset] = i
-
-            # Failing to find the newline is OK, -1 maps to 0.
-            for m in matches:
-                newline_offset = string.rfind("\n", 0, m.start())
-                line_number = newline_table[newline_offset]
-                yield path, line_number, m
-
     def get_offending_brltty_rules(self):
         paths = self._main_udev_rules_dir.rglob(self._brltty_path_glob)
-        # yields (path, line_number, m)
-        offending_matches = self.finditer_with_line_numbers(
-            pattern=self._brltty_re, paths=paths
-        )
-        for match in offending_matches:
-            msg = f"Found {self._brltty_re} in \n{match[0]} \nline#: {match[1]}"
+        offending_brltty_udev_paths = []
+
+        for path in paths:
+            m = re.search(self._brltty_re, path.read_text())
+            if not m:
+                continue  # i.e. go to next path
+
+            logger.debug(m)
+            offending_brltty_udev_paths.append(str(path))
+
+            msg = f"Found offending brltty udev rule in path:\n{path}"
             msg += "\n\n"
             msg += self._brltty_user_msg
-            print(msg)
+            print(msg)  # petty enough to additionally print?
             logger.error(msg)
+
+        return offending_brltty_udev_paths
