@@ -1,7 +1,6 @@
+import logging
 import re
 from pathlib import Path
-import logging
-
 
 logger = logging.getLogger("pygmc.connection.udev_rule_check")
 
@@ -24,13 +23,13 @@ class UDevRuleCheck:
         self._brltty_path_glob = "*brltty*"
         # the \n in front is because re.search and we want to match the line
         # if it's not commented out
-        self._brltty_re = '\nENV{PRODUCT}=="1a86/7523/\*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"'
+        self._brltty_re = '\nENV{PRODUCT}=="1a86/7523/\\*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"'
 
         self._brltty_user_msg = """
         There is a linux 'udev' rule matching a GQ GMC device that is blocking the GMC
-        from being accessed. It's a popular Ubuntu bug. See: 
+        from being accessed. It's a popular Ubuntu bug. See:
         https://askubuntu.com/questions/1403705/dev-ttyusb0-not-present-in-ubuntu-22-04
-        
+
         Solutions are listed below from easiest to more involved.
         1) Run the command `sudo apt remove brltty`
             - If you are able to see, this will remove the braille (for the blind) display
@@ -38,12 +37,13 @@ class UDevRuleCheck:
         2) Find the following line and comment it out.
             - ENV{PRODUCT}=="1a86/7523/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
             - Most commonly found in: /usr/lib/udev/rules.d/85-brltty.rules
-            
-        
+
+
         TLDR: Run cmd `sudo apt remove brltty`
         """
 
     def get_offending_brltty_rules(self):
+        """Get offending brltty udev rules."""
         paths = self._main_udev_rules_dir.rglob(self._brltty_path_glob)
         offending_brltty_udev_paths = []
 
