@@ -2,6 +2,7 @@
 Mock the connection class to deterministically return results recorded from GMC-300S.
 Structured in a novice friendly manner.
 """
+
 import datetime
 
 import pytest
