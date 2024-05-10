@@ -5,6 +5,8 @@
   - set_wifi_on, set_wifi_off, set_wifi_ssid, set_wifi_password
 - gmcmap.com commands
   - set_gmcmap_user_id, set_gmcmap_counter_id
+- Added check for brltty udev rule that blocks USB on Ubuntu.
+  - Gives user direction to fix Ubuntu issue connecting to GMC device.
 
 ## 0.12.0 (2024-04-16)
 - Added save_history_csv()
