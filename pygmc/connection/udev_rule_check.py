@@ -38,6 +38,9 @@ class UDevRuleCheck:
         2) Find the following line and comment it out.
             - ENV{PRODUCT}=="1a86/7523/*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"
             - Most commonly found in: /usr/lib/udev/rules.d/85-brltty.rules
+            
+        
+        TLDR: Run cmd `sudo apt remove brltty`
         """
 
     def get_offending_brltty_rules(self):
