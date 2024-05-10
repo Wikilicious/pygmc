@@ -7,6 +7,8 @@
   - set_gmcmap_user_id, set_gmcmap_counter_id
 - Added check for brltty udev rule that blocks USB on Ubuntu.
   - Gives user direction to fix Ubuntu issue connecting to GMC device.
+- Reduced scope of get_connection_details()
+  - Removed details not available in pyserial connection object.
 
 ## 0.12.0 (2024-04-16)
 - Added save_history_csv()
