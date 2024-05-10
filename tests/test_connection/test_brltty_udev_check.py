@@ -35,7 +35,7 @@ ENV{PRODUCT}=="1c71/c004/*", ENV{BRLTTY_BRAILLE_DRIVER}="bn", GOTO="brltty_usb_r
 
 def test_non_match_brltty_check():
     udrc = UDevRuleCheck()
-    with tempfile.NamedTemporaryFile(mode='w') as fp:
+    with tempfile.NamedTemporaryFile(mode="w") as fp:
         fp.write(text_brltty_commented_out)
         fp.seek(0)
         p = Path(fp.name)
@@ -53,7 +53,7 @@ def test_non_match_brltty_check():
 
 def test_match_brltty_check():
     udrc = UDevRuleCheck()
-    with tempfile.NamedTemporaryFile(mode='w') as fp:
+    with tempfile.NamedTemporaryFile(mode="w") as fp:
         fp.write(text_brltty_match)
         fp.seek(0)
         p = Path(fp.name)
