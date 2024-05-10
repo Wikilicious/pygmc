@@ -24,7 +24,7 @@ class UDevRuleCheck:
         self._brltty_path_glob = "*brltty*"
         # the \n in front is because re.search and we want to match the line
         # if it's not commented out
-        self._brltty_re = 'ENV{PRODUCT}=="1a86/7523/\*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"'
+        self._brltty_re = '\nENV{PRODUCT}=="1a86/7523/\*", ENV{BRLTTY_BRAILLE_DRIVER}="bm", GOTO="brltty_usb_run"'
 
         self._brltty_user_msg = """
         There is a linux 'udev' rule matching a GQ GMC device that is blocking the GMC
