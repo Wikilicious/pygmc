@@ -9,7 +9,6 @@ import time
 
 # pypi
 import serial
-from serial.tools import list_ports as serial_list_ports
 
 from .const import BAUDRATES
 
