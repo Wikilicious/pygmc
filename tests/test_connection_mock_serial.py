@@ -3,6 +3,7 @@ This mocks a device at a lower level and allows us to test pygmc.Connection()
 We just need to test one device because all we really want is to test pygmc.Connection()
 mock_serial only works on Linux, so skip test if not on Linux.
 """
+
 import sys  # noqa: I001
 import pytest
 from serial import Serial

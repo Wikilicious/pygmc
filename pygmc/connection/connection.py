@@ -3,6 +3,7 @@ Represent a USB connection to a GMC.
 
 This is the communication class.
 """
+
 import inspect
 import logging
 import time
