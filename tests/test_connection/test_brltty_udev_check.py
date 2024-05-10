@@ -1,7 +1,14 @@
+import sys
 import tempfile
 from pathlib import Path
 
+import pytest
+
 from pygmc.connection.udev_rule_check import UDevRuleCheck
+
+if not sys.platform.startswith("linux"):
+    pytest.skip("skipping tests - not running linux", allow_module_level=True)
+
 
 text_brltty_commented_out = """
 # Device: 16C0:05E1
