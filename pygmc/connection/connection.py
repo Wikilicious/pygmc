@@ -93,44 +93,12 @@ class Connection:
             "is_open": None,
             "in_waiting": None,
             "out_waiting": None,
-            "name": None,
             "timeout": None,
         }
 
         for key in list(deets):
             if hasattr(self._con, key):
                 deets[key] = getattr(self._con, key)
-
-        usb_info = {
-            "description": None,
-            "hwid": None,
-            "location": None,
-            "pid": None,
-            "usb_device_path": None,
-            "vid": None,
-        }
-
-        deets_port = deets["port"]
-        ports = []
-        port_info = None
-        if deets_port:
-            ports = list(
-                serial_list_ports.grep(regexp=f"^{deets_port}$", include_links=True)
-            )
-        if deets_port is None:
-            # port_info will be None which won't hasattr i.e. returns all None.
-            logger.warning(f"Unable to identify USB info for {deets_port}")
-        elif len(ports) != 1:
-            # ports var may not exist. The if catches that.
-            logger.warning(f"Unable to identify USB info for {deets_port}")
-        else:
-            port_info = ports[0]
-
-        for key in list(usb_info):
-            if hasattr(port_info, key):
-                usb_info[key] = getattr(port_info, key)
-
-        deets.update(usb_info)
 
         return deets
 
