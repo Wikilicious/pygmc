@@ -1,4 +1,4 @@
-black==23.3
+black==24.4.2
 bump-my-version
 ruff
 flake8
