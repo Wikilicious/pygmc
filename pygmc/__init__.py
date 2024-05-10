@@ -33,6 +33,7 @@ from pygmc.devices import (
     auto_get_device_from_discovery_details as _auto_get_device_class,
 )
 from pygmc.history import HistoryParser
+from pygmc.connection.udev_rule_check import UDevRuleCheck
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +70,10 @@ def connect(
     discovered_devices = discover.get_all_devices()
 
     if len(discovered_devices) == 0:
+        # Give user direction in case of brltty udev rule blocking GMC USB device
+        brltty_udev_rule_check = UDevRuleCheck()
+        # line below logs & prints info for user to resolve USB connection issue
+        brltty_udev_rule_check.get_offending_brltty_rules()
         raise ConnectionError("No GMC devices found.")
 
     device_details = discovered_devices[0]
