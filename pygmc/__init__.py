@@ -15,6 +15,7 @@ import logging
 import time
 
 from pygmc.connection import Connection, Discovery
+from pygmc.connection.udev_rule_check import UDevRuleCheck
 from pygmc.devices import (
     GMC300,
     GMC300S,
@@ -33,7 +34,6 @@ from pygmc.devices import (
     auto_get_device_from_discovery_details as _auto_get_device_class,
 )
 from pygmc.history import HistoryParser
-from pygmc.connection.udev_rule_check import UDevRuleCheck
 
 logger = logging.getLogger(__name__)
 
