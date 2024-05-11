@@ -1,6 +1,8 @@
 # PyGMC - Change Log
 
 ## Unreleased
+
+## 0.13.0 (2024-05-11)
 - Added WiFi commands
   - set_wifi_on, set_wifi_off, set_wifi_ssid, set_wifi_password
 - gmcmap.com commands
