@@ -9,6 +9,8 @@
   - Gives user direction to fix Ubuntu issue connecting to GMC device.
 - Reduced scope of get_connection_details()
   - Removed details not available in pyserial connection object.
+- Bug fixes
+  - Re-added all optional baudrates after learning the default can be modified.
 
 ## 0.12.0 (2024-04-16)
 - Added save_history_csv()

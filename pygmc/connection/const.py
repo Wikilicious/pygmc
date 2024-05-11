@@ -1,14 +1,8 @@
 # baudrates for GMC device
-# Seems like the devices have only one baudrate they work with.
-# Only two known baudrates for all GMC devices.
+# First one is most common default baudrate, second one is second most common default.
+# The rest are not a default but they are an option on the device.
+# Is a lower baudrate more stable?
 BAUDRATES = (
-    115200,
-    57600,
-)
-
-
-# All baudrates
-ALL_BAUDRATES = (
     115200,
     57600,
     38400,
