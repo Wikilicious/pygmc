@@ -1,6 +1,8 @@
 # PyGMC - Change Log
 
 ## Unreleased
+- Separate get_usv_h from get_cpm.
+  - Can now pass in a cpm value or leave None for default behavior.
 
 ## 0.13.0 (2024-05-11)
 - Added WiFi commands
