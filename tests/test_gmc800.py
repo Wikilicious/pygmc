@@ -176,5 +176,7 @@ def test_usv(calib_config, cpm, expected):
 
     mock_device_usv.get_cpm = lambda: cpm
     usv = mock_device_usv.get_usv_h()
+    usv_from_input = mock_device_usv.get_usv_h(cpm=cpm)
 
-    assert usv == expected
+    assert usv == expected, "uSv does not match expected config calibration"
+    assert usv == usv_from_input, "manual input cpm does not match equivalent get_cpm"
