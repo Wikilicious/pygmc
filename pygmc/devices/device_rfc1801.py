@@ -97,11 +97,22 @@ class DeviceRFC1801(BaseDevice):
         count = struct.unpack(">I", result)[0]
         return count
 
-    def get_usv_h(self) -> float:
+    def get_usv_h(self, cpm=None) -> float:
         """
-        Get µSv/h.
+        Get µSv/h as is displayed by the device. See notes below.
 
+        cpm: int | None
+            Counts per minute to be converted to µSv/h.
+            Default=None polls device for live cpm to convert.
+            If cpm is provided, user input is used instead.
+
+        Notes
+        -----
         Uses device calibration config.
+        GQ does not have an official source documentation for device configuration nor
+        cpm-to-µSv/h formula. A revision firmware update by GQ may change the config
+        bytes and is often not announced.
+        Treat the output as a best effort convenience.
 
         Returns
         -------
@@ -109,6 +120,9 @@ class DeviceRFC1801(BaseDevice):
             µSv/h
 
         """
+        if cpm is None:
+            cpm = self.get_cpm()
+
         # lazily load config... i.e. don't load it until it's needed.
         if not self._config:
             self.get_config()
@@ -121,7 +135,6 @@ class DeviceRFC1801(BaseDevice):
             ]
             self._set_usv_calibration(calibrations)
 
-        cpm = self.get_cpm()
         usv_h = None
         for calib in self._usv_calibration_tuple:
             calib_max_cpm, calib_slope, calib_intercept = calib
