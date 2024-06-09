@@ -16,7 +16,7 @@ gc300e_plus = pygmc.GMC300EPlus(port=None, baudrate=123, connection=actions_conn
 
 # Do both GMC500 and GMC500+ together
 parametrize_data = [(gc300, x) for x in data_gmc300s.actions_device_test_cases]
-parametrize_data.extend([(gc300, x) for x in data_gmc300s.actions_device_test_cases])
+parametrize_data.extend([(gc300s, x) for x in data_gmc300s.actions_device_test_cases])
 parametrize_data.extend(
     [(gc300e_plus, x) for x in data_gmc300s.actions_device_test_cases]
 )
