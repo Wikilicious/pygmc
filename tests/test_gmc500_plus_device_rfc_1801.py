@@ -4,6 +4,7 @@ Structured in a novice friendly manner.
 """
 
 import datetime
+import getpass
 
 import pytest
 
@@ -172,3 +173,17 @@ def test_usv(calib_config, cpm, expected):
 
     assert usv == expected, "uSv does not match expected config calibration"
     assert usv == usv_from_input, "manual input cpm does not match equivalent get_cpm"
+
+
+def test_getpass_password_input(monkeypatch):
+    cmd_response_map_usv = {b"<SETWIFIPWDawkins>>": b"\xaa"}
+    mock_connection_pswd = MockConnection(cmd_response_map_usv)
+
+    monkeypatch.setattr(getpass, "getpass", lambda: "Dawkins")
+
+    mock_device_pswd = devices.DeviceRFC1801(mock_connection_pswd)
+    mock_device_pswd.set_wifi_password()  # empty input to test our monkeypatch getpass
+
+    cmd_called_count = mock_connection_pswd.get_cmd_calls(b"<SETWIFIPWDawkins>>")
+
+    assert cmd_called_count == 1
