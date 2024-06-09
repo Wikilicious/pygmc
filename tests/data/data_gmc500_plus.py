@@ -63,6 +63,16 @@ actions_cmd_response_map = {
     b"<POWERON>>": b"",
     b"<HEARTBEAT1>>": b"\x00\x00\x00\x13",  # 19
     b"<HEARTBEAT0>>": b"",
+    b"<WiFiON>>": b"\xaa",
+    b"<WiFiOFF>>": b"\xaa",
+    # pswd=Dawkins
+    b"<SETWIFIPWDawkins>>": b"\xaa",
+    # ssid=Science
+    b"<SETSSIDScience>>": b"\xaa",
+    # user_id=001
+    b"<SETUSERID001>>": b"\xaa",
+    # counter_id=0001
+    b"<SETCOUNTERID0001>>": b"\xaa",
 }
 
 
@@ -168,15 +178,14 @@ actions_device_test_cases = [
         "expected_read": b"",
         "raises": None,
     },
-    # TODO: investigate WTF!
     # AH! hb calls hb-off after calling on! ugh! duh!
     {
-        "test_name": "heartbeat live WTFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+        "test_name": "heartbeat live test off gets called",
         "method": "heartbeat_live",
         "args": (),
         "kwargs": {"count": 1},
         "return": 19,
-        "expected_write": b"<HEARTBEAT0>>",  # WTF! Why is this passing!
+        "expected_write": b"<HEARTBEAT0>>",
         "expected_read": b"",
         "raises": None,
     },
@@ -200,6 +209,66 @@ actions_device_test_cases = [
         "return": None,
         "expected_write": b"<HEARTBEAT1>>",
         "expected_read": b"",
+        "raises": None,
+    },
+    {
+        "test_name": "WiFi ON",
+        "method": "set_wifi_on",
+        "args": (),
+        "kwargs": {},
+        "return": None,
+        "expected_write": b"<WiFiON>>",
+        "expected_read": b"\xaa",
+        "raises": None,
+    },
+    {
+        "test_name": "WiFi OFF",
+        "method": "set_wifi_off",
+        "args": (),
+        "kwargs": {},
+        "return": None,
+        "expected_write": b"<WiFiOFF>>",
+        "expected_read": b"\xaa",
+        "raises": None,
+    },
+    {
+        "test_name": "Set SSID",
+        "method": "set_wifi_ssid",
+        "args": (),
+        "kwargs": {"ssid": "Science"},
+        "return": None,
+        "expected_write": b"<SETSSIDScience>>",
+        "expected_read": b"\xaa",
+        "raises": None,
+    },
+    {
+        "test_name": "WiFi PSWD",
+        "method": "set_wifi_password",
+        "args": (),
+        "kwargs": {"password": "Dawkins"},
+        "return": None,
+        "expected_write": b"<SETWIFIPWDawkins>>",
+        "expected_read": b"\xaa",
+        "raises": None,
+    },
+    {
+        "test_name": "Set User ID",
+        "method": "set_gmcmap_user_id",
+        "args": (),
+        "kwargs": {"user_id": "001"},
+        "return": None,
+        "expected_write": b"<SETUSERID001>>",
+        "expected_read": b"\xaa",
+        "raises": None,
+    },
+    {
+        "test_name": "Set Counter ID",
+        "method": "set_gmcmap_counter_id",
+        "args": (),
+        "kwargs": {"counter_id": "0001"},
+        "return": None,
+        "expected_write": b"<SETCOUNTERID0001>>",
+        "expected_read": b"\xaa",
         "raises": None,
     },
 ]
