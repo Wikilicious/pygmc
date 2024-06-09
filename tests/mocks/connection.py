@@ -18,7 +18,7 @@ class MockConnection(connection.Connection):
     def reset_buffers(self):
         print("reset_buffers")
 
-    def write(self, cmd):
+    def write(self, cmd, log=True):
         self._cmd = cmd
         self._cmd_calls_dict[cmd] += 1
         print(cmd)
