@@ -13,7 +13,6 @@ __license__ = "MIT"
 
 
 import logging
-import time
 
 from pygmc.connection import Connection, Discovery
 from pygmc.connection.udev_rule_check import UDevRuleCheck
@@ -42,6 +41,7 @@ logger = logging.getLogger(__name__)
 def connect(
     port=None,
     baudrate=None,
+    timeout=5,
 ):
     """
     Connect to device.
@@ -61,13 +61,19 @@ def connect(
     baudrate: int | None
         Device baudrate. Leave None to auto-detect baudrate. Only applicable when port
         is specified.
+    timeout: int
+        Time limit for pyserial to raise timeout.
 
     Raises
     ------
     ConnectionError
         Unable to connect to device.
     """
-    discover = Discovery(port=port, baudrate=baudrate)
+    # Difficult choice... Discovery is temporary... and is nearly always instant or
+    # requires user action to dis/re-connect USB. (i.e. nothing pygmc can do)
+    # So why make a long timeout? Fail fast but override Discovery timeout or fail slow
+    # and use user provided timeout?
+    discover = Discovery(port=port, baudrate=baudrate, timeout=timeout)
     discovered_devices = discover.get_all_devices()
 
     if len(discovered_devices) == 0:
@@ -83,6 +89,8 @@ def connect(
 
     device_class = _auto_get_device_class(device_details)
 
-    gc = device_class(port=device_details.port, baudrate=device_details.baudrate)
+    gc = device_class(
+        port=device_details.port, baudrate=device_details.baudrate, timeout=timeout
+    )
 
     return gc

@@ -11,6 +11,7 @@ class GMC300(DeviceRFC1201):
         self,
         port,
         baudrate=57600,
+        timeout=5,
         connection=None,
     ):
         """
@@ -23,14 +24,16 @@ class GMC300(DeviceRFC1201):
             If None, a Connection object is required.
         baudrate: int
             Device baudrate. Default value is the best-known value for the device.
-        connection : pygmc.Connection
+        timeout: int
+            Time limit for pyserial to raise timeout.
+        connection: pygmc.Connection
             An initialized pygmc connection interface to the USB device.
             Overrides port & baudrate.
         """
         if isinstance(connection, Connection):
             super().__init__(connection)
         elif port and isinstance(baudrate, int):
-            conn = Connection(port=port, baudrate=baudrate, timeout=5)
+            conn = Connection(port=port, baudrate=baudrate, timeout=timeout)
             super().__init__(conn)
         else:
             raise ConnectionError(f"Unable to connect port={port} baudrate={baudrate}")
@@ -45,6 +48,7 @@ class GMC300S(DeviceRFC1201):
         self,
         port,
         baudrate=57600,
+        timeout=5,
         connection=None,
     ):
         """
@@ -57,6 +61,8 @@ class GMC300S(DeviceRFC1201):
             If None, a Connection object is required.
         baudrate: int
             Device baudrate. Default value is the best-known value for the device.
+        timeout: int
+            Time limit for pyserial to raise timeout.
         connection : pygmc.Connection
             An initialized pygmc connection interface to the USB device.
             Overrides port & baudrate.
@@ -64,7 +70,7 @@ class GMC300S(DeviceRFC1201):
         if isinstance(connection, Connection):
             super().__init__(connection)
         elif port and isinstance(baudrate, int):
-            conn = Connection(port=port, baudrate=baudrate, timeout=5)
+            conn = Connection(port=port, baudrate=baudrate, timeout=timeout)
             super().__init__(conn)
         else:
             raise ConnectionError(f"Unable to connect port={port} baudrate={baudrate}")
@@ -78,6 +84,7 @@ class GMC300EPlus(DeviceRFC1201):
         self,
         port,
         baudrate=57600,
+        timeout=5,
         connection=None,
     ):
         """
@@ -90,6 +97,8 @@ class GMC300EPlus(DeviceRFC1201):
             If None, a Connection object is required.
         baudrate: int
             Device baudrate. Default value is the best-known value for the device.
+        timeout: int
+            Time limit for pyserial to raise timeout.
         connection : pygmc.Connection
             An initialized pygmc connection interface to the USB device.
             Overrides port & baudrate.
@@ -97,7 +106,7 @@ class GMC300EPlus(DeviceRFC1201):
         if isinstance(connection, Connection):
             super().__init__(connection)
         elif port and isinstance(baudrate, int):
-            conn = Connection(port=port, baudrate=baudrate, timeout=5)
+            conn = Connection(port=port, baudrate=baudrate, timeout=timeout)
             super().__init__(conn)
         else:
             raise ConnectionError(f"Unable to connect port={port} baudrate={baudrate}")
