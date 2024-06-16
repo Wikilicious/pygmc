@@ -2,11 +2,9 @@ import logging
 import sys
 
 import pytest
-import serial
 from serial import Serial
 
 import pygmc
-
 
 if not sys.platform.startswith("linux"):
     pytest.skip("skipping tests - not running linux", allow_module_level=True)
