@@ -19,7 +19,7 @@ device_details = namedtuple("Device", ["port", "baudrate", "version", "serial_nu
 class Discovery:
     """Discover GMC Devices"""
 
-    def __init__(self, port=None, baudrate=None):
+    def __init__(self, port=None, baudrate=None, timeout=3):
         """
         Discover GMC devices.
 
@@ -30,6 +30,7 @@ class Discovery:
         baudrate: int | None
             Device baudrate, if known. Leave None to auto-discover correct baudrate.
         """
+        self._timeout = timeout
         self._discovered_devices = []
         self._discover_devices_flow(port=port, baudrate=baudrate)
 
@@ -87,7 +88,7 @@ class Discovery:
     def _validate_device(self, port, baudrate) -> bool:
         logger.debug(f"Checking port={port} baudrate={baudrate}")
         try:
-            conn = Connection(port=port, baudrate=baudrate, timeout=2)
+            conn = Connection(port=port, baudrate=baudrate, timeout=self._timeout)
         except SerialException as e:
             # Should a convenience method log as warning/error?
             # If only GQ Electronics would put the version/serial in USB description...

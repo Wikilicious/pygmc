@@ -3,6 +3,9 @@
 ## Unreleased
 - Separate get_usv_h from get_cpm.
   - Can now pass in a cpm value or leave None for default behavior.
+- Added timeout parameter in pygmc.connect & devices.
+  - Previously hardcoded to 5 seconds - now a kwarg in all devices and pygmc.connect.
+  - Added more unittests - to guarantee kwarg consistency.
 
 ## 0.13.0 (2024-05-11)
 - Added WiFi commands

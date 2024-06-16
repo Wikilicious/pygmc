@@ -36,7 +36,7 @@ class Connection:
             Speed of communication over serial USB. Must be a compatible value.
         timeout : int, optional
             Serial connection timeout, seconds, by default 5
-        serial_connection: serial.Serial
+        serial_connection: serial.Serial | None
             An initialized Serial instance.
         """
         # pyserial has a breaking change from 3.4 to 3.5
@@ -60,10 +60,15 @@ class Connection:
             self._con = serial_connection
         else:
             if baudrate not in BAUDRATES:
-                logger.error(f"Input baudrate={baudrate} not in known compatible rates.")
-                logger.error(f"Known compatible baudrates={BAUDRATES}")
-                logger.error("To force baudrate, pass in your own serial_connection")
-            self._con = serial.Serial(port=port, baudrate=baudrate, timeout=timeout)
+                logger.warning(f"Baudrate={baudrate} not in known compatible rates.")
+                logger.warning(f"Known compatible baudrates={BAUDRATES}")
+            try:
+                self._con = serial.Serial(port=port, baudrate=baudrate, timeout=timeout)
+            except TimeoutError:
+                # See issue #112
+                # Windows-running-VMware-running-Ubuntu - sleep-wake - USB issue
+                logger.exception("Timeout connecting - consider reconnecting USB")
+                raise
 
     def __repr__(self):
         """Use pyserial __repr__"""

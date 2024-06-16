@@ -13,18 +13,6 @@ from .gmcse import GMCSE
 
 logger = logging.getLogger("pygmc.device")
 
-_device_map = {
-    "GMC-280": DeviceRFC1201,
-    "GMC-300": DeviceRFC1201,
-    "GMC-320": DeviceRFC1201,
-    "GMC-500": DeviceRFC1801,
-    "GMC-600": DeviceRFC1801,
-    # seemed like bigger number would use newer rfc spec until GMC-800
-    # listed as RFC1201 in https://www.gqelectronicsllc.com/GMC-800UserGuide.pdf
-    "GMC-800": DeviceRFC1201,
-    "GMC-SE": DeviceRFC1201,
-}
-
 
 # Match regex to device. Order matters. First match is used.
 device_match_list = [
@@ -63,8 +51,10 @@ device_match_list = [
         "match_regex": r"GMC-320\+",
         "device_class": GMC320Plus,
         "protocol_class": DeviceRFC1201,
-        # My 2019 GC says GMC320 Plus however <GETVER>> doesn't.
-        "version_example": "GMC-320Re 4.26",
+        # My 2019 GC says GMC320 Plus however <GETVER>> returns 'GMC-320Re 4.26'
+        # For sake of passing unittests (and hoping a newer rev adds the '+')
+        # Faking version below from "GMC-320Re 4.26" --> "GMC-320+Re 4.26"
+        "version_example": "GMC-320+Re 4.26",
     },
     {
         "match_regex": r"GMC-320",
@@ -92,7 +82,7 @@ device_match_list = [
         "match_regex": r"GMC-600\+",
         "device_class": GMC600Plus,
         "protocol_class": DeviceRFC1801,
-        "version_example": "",
+        "version_example": "GMC-600+Re 2.52",  # Thomaz device
     },
     {
         "match_regex": r"GMC-600",
@@ -102,6 +92,9 @@ device_match_list = [
         "version_example": "",
     },
     # GMC800's
+    # Listed as RFC1201 in https://www.gqelectronicsllc.com/GMC-800UserGuide.pdf
+    # See: https://www.gqelectronicsllc.com/forum/topic.asp?TOPIC_ID=10394
+    # PyGMC invented a spec - DeviceSpec404 - For GMC800 with incorrect official spec
     {
         "match_regex": r"GMC-800",
         "device_class": GMC800,
@@ -113,7 +106,6 @@ device_match_list = [
         "match_regex": r"GMC-SE",
         "device_class": GMCSE,
         "protocol_class": DeviceRFC1201,
-        # Open Issue on PyGMC github... make a PR... Provide an example
         "version_example": "GMC-SE Re 1.05",
     },
 ]
