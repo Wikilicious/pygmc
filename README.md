@@ -19,6 +19,10 @@ own tools on top of a stable package.
 ```shell
 pip install pygmc
 ```
+```shell
+conda install conda-forge::pygmc
+```
+Conda PyGMC version may lag latest PyPI version.
 
 ## Example Usage
 
