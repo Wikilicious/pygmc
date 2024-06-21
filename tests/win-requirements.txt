@@ -1,4 +1,5 @@
-pyserial>=3.4
+freezegun==1.5.1
+pyserial==3.5
 pytest
 flake8
 ruff
