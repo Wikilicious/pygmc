@@ -31,7 +31,7 @@ class DeviceSpec404(BaseDevice):
                 # You can communicate with a device while it's off
                 "index": 0,
                 "size": 1,
-                "description": "0=ON, 1=OFF (YES, ZERO MEANS OFF.)",
+                "description": "0=ON, 1=OFF (YES, ZERO MEANS ON.)",
                 "type": "B",
             },
             "Save_Mode": {
