@@ -102,7 +102,7 @@ df = pd.DataFrame(history[1:], columns=history[0])
   - [GeigerLog](https://sourceforge.net/projects/geigerlog/)
   - gq-gmc-control
   - gmc
-- Device website [GQ Electronics](https://gqelectronicsllc.com/) Seattle, WA
+- Device website [GQ Electronics](https://gqelectronicsllc.com/?referer=pygmc) Seattle, WA
   - Not affiliated in any way.
 
 
