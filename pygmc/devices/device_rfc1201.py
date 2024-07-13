@@ -286,18 +286,24 @@ class DeviceRFC1201(BaseDevice):
 
         """
         max_ = 0
-        i = 0
-        for cps in self.heartbeat_live(count=count):
-            i += 1
+        total = 0
+        for i, cps in enumerate(self.heartbeat_live(count=count)):
             if cps > max_:
                 max_ = cps
-            # Yea, I'd rather use f-string... just trying to make it compatible with
-            # older Python versions
-            # empty leading space for terminal cursor
-            msg = " cps={cps:<2} | max={max_:<2} | loop={i:<10,}".format(
-                cps=cps, max_=max_, i=i
-            )
+            total += cps
+            # more than 4 digits for cps is scary... but let's stick to specs
+            # From https://www.gqelectronicsllc.com/support/GMC_Selection_Guide.htm
+            # highest cpm value is "999,999" (a strange number, unlike 65,535)
+            # perhaps due to screen width limitations. let's use same for cps
+            # 10 spaces (with commas) per sec... like 3 years
+            # total uses 11 spaces... if you're doing more than 10 cps for three years
+            # ...
+
+            # Why the leading empty space?
+            # Because the cursor blinker takes up one space and blocks view.
+            msg = f" cps={cps:<7,} | max={max_:<7,} | total={total:<11,} | loop={i:<10,}"
             print(msg, end="\r")  # Carriage return - update line we just printed
+        # Why extra print \n? Because \r at end causes prompt to end-up shifted at end
         print("", end="\n")  # empty print to move carriage return to next line
 
     def power_off(self) -> None:
