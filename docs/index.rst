@@ -34,9 +34,21 @@ Install PyGMC from PYPI: https://pypi.org/project/pygmc/
 
    pip install pygmc
 
+Install PyGMC from Conda-Forge: https://anaconda.org/conda-forge/pygmc
+
+.. code-block:: bash
+
+   conda install conda-forge::pygmc
+
+Conda version may lag latest pypi version.
+
 
 Example Usage
 -------------
+
+.. image:: image/pygmc_usage_example_0.9.1.gif
+   :width: 800
+
 
 Auto discover connected GMC, auto identify baudrate, and auto select correct device.
 
@@ -112,6 +124,7 @@ Supported Devices
    devices
    connection
    history
+   cli
    examples
    knownissues
 
