@@ -24,6 +24,10 @@ classifiers = [
 ]
 
 
+[project.scripts]
+pygmc = "pygmc.cli:main"
+
+
 [project.urls]
 Homepage = "https://github.com/Wikilicious/pygmc"
 Documentation = "https://pygmc.readthedocs.io/"
