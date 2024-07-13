@@ -1,24 +1,20 @@
-"""
-PyGMC CLI - Command-Line-Interface
-
-"""
+"""PyGMC CLI - Command-Line-Interface"""
 
 import argparse
 import datetime
 from pathlib import Path
 
-
 try:
     from .connection import (
         Connection,
         Discovery,
-        get_gmc_usb_devices,
         get_all_usb_devices,
+        get_gmc_usb_devices,
     )
+    from .connection.udev_rule_check import UDevRuleCheck
     from .devices import (
         auto_get_device_from_discovery_details as _auto_get_device_class,
     )
-    from .connection.udev_rule_check import UDevRuleCheck
 except ImportError:
     # I don't like this...
     # it's hard to test, likely to cause a failure, & D.R.Y. violation
@@ -29,7 +25,8 @@ except ImportError:
     # However... I suspect users may try "python pygmc/cli.py --help"
     # They will see ImportError and think "it must be an issue with the package"
     # Consider the imports below a convenience
-    from connection import Connection, Discovery, get_gmc_usb_devices, get_all_usb_devices
+    # No-quality-assurance 'noqa' tag
+    from connection import Connection, Discovery, get_gmc_usb_devices, get_all_usb_devices  # noqa
     from devices import (
         auto_get_device_from_discovery_details as _auto_get_device_class,
     )
