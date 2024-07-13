@@ -26,14 +26,14 @@ except ImportError:
     # They will see ImportError and think "it must be an issue with the package"
     # Consider the imports below a convenience
     # No-quality-assurance 'noqa' tag
-    from connection import (
-        Connection,
-        Discovery,
-        get_gmc_usb_devices,
-        get_all_usb_devices,
+    from connection import (  # noqa
+        Connection,  # noqa
+        Discovery,  # noqa
+        get_gmc_usb_devices,  # noqa
+        get_all_usb_devices,  # noqa
     )  # noqa
     from devices import (
-        auto_get_device_from_discovery_details as _auto_get_device_class,
+        auto_get_device_from_discovery_details as _auto_get_device_class,  # noqa
     )
     from connection.udev_rule_check import UDevRuleCheck
 
