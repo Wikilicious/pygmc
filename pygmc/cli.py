@@ -6,7 +6,6 @@ from pathlib import Path
 
 try:
     from .connection import (
-        Connection,
         Discovery,
         get_all_usb_devices,
         get_gmc_usb_devices,
@@ -16,26 +15,11 @@ try:
         auto_get_device_from_discovery_details as _auto_get_device_class,
     )
 except ImportError:
-    # I don't like this...
-    # it's hard to test, likely to cause a failure, & D.R.Y. violation
-    # Ideally used with the configured entry_point created during installation
-    # i.e. "pygmc --help"
-    # If code is copied (instead of installed)
-    # Should be used like: "python -m pygmc.cli --help" (yes, use dot)
-    # However... I suspect users may try "python pygmc/cli.py --help"
-    # They will see ImportError and think "it must be an issue with the package"
-    # Consider the imports below a convenience
-    # No-quality-assurance 'noqa' tag
-    from connection import (  # noqa
-        Connection,  # noqa
-        Discovery,  # noqa
-        get_gmc_usb_devices,  # noqa
-        get_all_usb_devices,  # noqa
-    )  # noqa
-    from devices import (
-        auto_get_device_from_discovery_details as _auto_get_device_class,  # noqa
-    )
-    from connection.udev_rule_check import UDevRuleCheck
+    # Most likely error while trying 'python ./some_path/pygmc/cli.py --help'
+    # ImportError: attempted relative import beyond top-level package
+    # The issue is pygmc/history.py is at same level as pygmc/cli.py
+    print("See documentation for correct usage.")
+    raise
 
 
 # Would've liked this in a function... but...
@@ -153,15 +137,27 @@ def _cli_flow_save(args):
         gc.save_history_raw(args.file_name)
 
 
-def main():
-    """CLI entry point."""
-    args = parser.parse_args()
+def main(argv=None) -> None:
+    """
+    CLI entry point.
+
+    Parameters
+    ----------
+    argv: None | list
+        Default=None for correct behavior. Main purpose is for unit-tests.
+
+    Returns
+    -------
+    None
+
+    """
+    args = parser.parse_args(argv)
 
     if args.actions == "usb":
         _list_usb_flow(show_all=args.all)
     elif args.actions == "live":
         _live_flow(args)
-    if args.actions == "save":
+    elif args.actions == "save":
         _cli_flow_save(args)
 
 
