@@ -67,7 +67,11 @@ class Connection:
             except TimeoutError:
                 # See issue #112
                 # Windows-running-VMware-running-Ubuntu - sleep-wake - USB issue
-                logger.exception("Timeout connecting - consider reconnecting USB")
+                # And # 118
+                # Bad USB cable/connection causing unreliable communication.
+                logger.exception(
+                    "TimeoutError - consider reconnecting USB or replacing USB cable."
+                )
                 raise
 
     def __repr__(self):
