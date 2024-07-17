@@ -1,6 +1,5 @@
 import datetime
 
-
 header = ("datetime", "count", "unit", "mode", "reference_datetime", "notes")
 # recorded on GMC500+, middle point start data and abrupt end,
 # a few reference times, and some notes, 110 char long.
