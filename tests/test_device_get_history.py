@@ -20,7 +20,9 @@ cmd_response_map = {
 }
 
 # device get_history includes columns as first row
-tidy_result = data_history_parser.raw_history_with_notes1_tidy
+tidy_result = data_history_parser.raw_history_with_notes1_tidy.copy()
+# The insert below is bad practice and gave me a headache - it mutates the value for
+# the next thing to use it. Added .copy()
 tidy_result.insert(
     0, ["datetime", "count", "unit", "mode", "reference_datetime", "notes"]
 )
