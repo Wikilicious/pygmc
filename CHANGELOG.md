@@ -1,6 +1,8 @@
 # PyGMC - Change Log
 
 ## Unreleased
+
+## 0.14.0 (2024-07-21)
 - Separate get_usv_h from get_cpm.
   - Can now pass in a cpm value or leave None for default behavior.
 - Added timeout parameter in pygmc.connect & devices.
