@@ -126,7 +126,7 @@ def _get_matched_class_from_version(version: str):
 
 def auto_get_device_from_discovery_details(device_details):
     """
-    Auto get device class from discovery device_details named tuple.
+    Auto get device class from discovery DeviceDetails named tuple.
 
     Parameters
     ----------
