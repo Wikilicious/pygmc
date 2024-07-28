@@ -13,7 +13,11 @@ from .utils import get_gmc_usb_devices
 logger = logging.getLogger("pygmc.discovery")
 
 
-device_details = namedtuple("Device", ["port", "baudrate", "version", "serial_number"])
+# Let's maintain "version" as full output from .get_version()
+# Add new fields "model" & "revision"
+DeviceDetails = namedtuple(
+    "Device", ["port", "baudrate", "version", "model", "revision", "serial_number"]
+)
 
 
 class Discovery:
@@ -49,6 +53,28 @@ class Discovery:
         else:
             # lemme just do everything for you... likely most common case
             self._discover_all()
+
+    @staticmethod
+    def _get_model_rev_from_version(ver: str) -> tuple:
+        """
+        Get model & rev from device version info.
+
+        Parameters
+        ----------
+        ver: str
+            Device version from get_version().
+
+        Returns
+        -------
+        tuple
+            (model, revision)
+            Returns empty str for each if unable to match.
+
+        """
+        m = re.search("(.*) ?Re ?([0-9.]*)", ver)
+        if m:
+            return m.groups()
+        return "", ""
 
     @staticmethod
     def _get_gmc_usb_ports() -> list:
@@ -100,8 +126,14 @@ class Discovery:
         if info:
             version = info["version"]
             serial_number = info["serial_number"]
-            discovered_device = device_details(
-                port=port, baudrate=baudrate, version=version, serial_number=serial_number
+            model, revision = self._get_model_rev_from_version(version)
+            discovered_device = DeviceDetails(
+                port=port,
+                baudrate=baudrate,
+                version=version,
+                model=model,
+                revision=revision,
+                serial_number=serial_number,
             )
             logger.debug(f"Discovered device: {discovered_device}")
             self._discovered_devices.append(discovered_device)
