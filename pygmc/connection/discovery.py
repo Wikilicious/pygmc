@@ -16,7 +16,7 @@ logger = logging.getLogger("pygmc.discovery")
 # Let's maintain "version" as full output from .get_version()
 # Add new fields "model" & "revision"
 DeviceDetails = namedtuple(
-    "Device", ["port", "baudrate", "version", "model", "revision", "serial_number"]
+    "Device", ["port", "baudrate", "version", "serial_number", "model", "revision"]
 )
 
 
@@ -71,7 +71,20 @@ class Discovery:
             Returns empty str for each if unable to match.
 
         """
-        m = re.search("(.*) ?Re ?([0-9.]*)", ver)
+        # See: https://www.gqelectronicsllc.com/forum/topic.asp?TOPIC_ID=10608
+
+        # ver=GMC-800Re1.08    --> model=GMC-800    re=1.08
+        # ver=GMC-600+Re 2.52  --> model=GMC-600+   re=2.52
+        # ver=GMC-500+Re 2.22  --> model=GMC-500+   re=2.22
+        # ver=GMC-320Re 4.26   --> model=GMC-320    re=4.26
+        # ver=GMC-300SRe 1.14  --> model=GMC-300S   re=1.14
+        # ver=GMC-SE Re 1.05   --> model=GMC-SE     re=1.05
+        # ver=GMC 404 Re3.14A  --> model=GMC 404    re=3.14A
+
+        # There could be a space in model (want to include)
+        # and a space after the model (don't want included)
+        # The '.*?' creates a non-greedy match.
+        m = re.search("(.*?) ?Re ?(.*)", ver)
         if m:
             return m.groups()
         return "", ""
