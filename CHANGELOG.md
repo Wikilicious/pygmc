@@ -1,6 +1,7 @@
 # PyGMC - Change Log
 
 ## Unreleased
+- Added model & firmware revision (from device version) to device Discovery
 
 ## 0.14.0 (2024-07-21)
 - Separate get_usv_h from get_cpm.
