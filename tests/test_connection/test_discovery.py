@@ -1,6 +1,6 @@
 import pytest
-from pygmc import Discovery
 
+from pygmc import Discovery
 
 # position: 0=<GETVER>, 1=model, 2=revision
 version_to_model_rev_test_cases = [
