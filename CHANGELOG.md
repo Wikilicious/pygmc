@@ -2,6 +2,10 @@
 
 ## Unreleased
 - Added model & firmware revision (from device version) to device Discovery
+- [BUG] History Parser can now handle 3 and 4 byte counts.
+  - Validated 3-byte count via smoke detector with americium-241.
+  - The 4-byte count... contact me if you can validate that.
+- [BUG] History Parser can now understand tube selection and faulty tube selection.
 
 ## 0.14.0 (2024-07-21)
 - Separate get_usv_h from get_cpm.
