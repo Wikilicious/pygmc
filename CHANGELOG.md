@@ -1,6 +1,8 @@
 # PyGMC - Change Log
 
 ## Unreleased
+
+## 0.14.1 (2024-09-12)
 - Added model & firmware revision (from device version) to device Discovery
 - [BUG] History Parser can now handle 3 and 4 byte counts.
   - Validated 3-byte count via smoke detector with americium-241.
