@@ -1,4 +1,3 @@
-import datetime
 import pygmc
 
 from .data import data_history_parser
