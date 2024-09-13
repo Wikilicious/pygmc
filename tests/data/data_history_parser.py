@@ -3,6 +3,7 @@ import datetime
 header = ("datetime", "count", "unit", "mode", "reference_datetime", "notes")
 # recorded on GMC500+, middle point start data and abrupt end,
 # a few reference times, and some notes, 110 char long.
+# contains 55 AA 05 55 AA (a faulty tube selection command)
 raw_history_with_notes1 = b"\x0c,5U\xaa\x05U\xaa\x00\x14\x07\x1a\x0c,6U\xaa\x00U\xaa\x00\x14\x07\x1a\x0c,6U\xaa\x01U\xaa\x00\x14\x07\x1a\x0c,7U\xaa\x02BX`][sYM[JSWXVBU\xaa\x00\x14\x07\x1a\r\x00\x1aU\xaa\x02U\xaa\x02\x05&5ABC?lpn\x80U\xaa\x00\x14\x07\x1a\r\x05&U\xaa\x02U\xaa\x02\x03ABCs\xa3t\x95\x95\x8fq\xa6"
 
 
@@ -676,5 +677,96 @@ raw_history_with_save_modes_tidy = [
         "every hour",
         datetime.datetime(2024, 1, 26, 18, 15, 41),
         "TEST",
+    ),
+]
+
+
+# Tube selection 55 AA 05 00  with 2 CPS counts
+# GMC-600+Re 2.52
+raw_history_tube_selection = (
+    b"U\xaa\x05\x00U\xaa\x00\x18\x03\x0c\x0f\x1c U\xaa\x01\x00\x00"
+)
+raw_history_tube_selection_tidy = [
+    (
+        datetime.datetime(2024, 3, 12, 15, 28, 33),
+        0,
+        "CPS",
+        "every second",
+        datetime.datetime(2024, 3, 12, 15, 28, 32),
+        None,
+    ),
+    (
+        datetime.datetime(2024, 3, 12, 15, 28, 34),
+        0,
+        "CPS",
+        "every second",
+        datetime.datetime(2024, 3, 12, 15, 28, 32),
+        None,
+    ),
+]
+
+
+# Three-Byte CPM Count! Took apart a smoke detector with americium-241
+# GMC-600+Re 2.52
+# truncated at exact positions
+raw_history_3byte_count = b"U\xaa\x00\x18\t\x06\x0f\x16\x03U\xaa\x02U\xaa\x03\x01<1U\xaa\x03\x01-\xe2U\xaa\x03\x01,L"
+raw_history_3byte_count_tidy = [
+    (
+        datetime.datetime(2024, 9, 6, 15, 23, 3),
+        80945,
+        "CPM",
+        "every minute",
+        datetime.datetime(2024, 9, 6, 15, 22, 3),
+        None,
+    ),
+    (
+        datetime.datetime(2024, 9, 6, 15, 24, 3),
+        77282,
+        "CPM",
+        "every minute",
+        datetime.datetime(2024, 9, 6, 15, 22, 3),
+        None,
+    ),
+    (
+        datetime.datetime(2024, 9, 6, 15, 25, 3),
+        76876,
+        "CPM",
+        "every minute",
+        datetime.datetime(2024, 9, 6, 15, 22, 3),
+        None,
+    ),
+]
+
+
+# fake 4-byte count data
+n = 20_000_000  # over 3 bytes
+raw_history_4byte_count = (
+    b"U\xaa\x00\x18\t\x06\x0f\x16\x03U\xaa\x02U\xaa\x03\x01<1U\xaa\x03\x01-\xe2U\xaa\x04"
+    + n.to_bytes(4, "big")
+)
+raw_history_4byte_count_tidy = [
+    (
+        datetime.datetime(2024, 9, 6, 15, 23, 3),
+        80945,
+        "CPM",
+        "every minute",
+        datetime.datetime(2024, 9, 6, 15, 22, 3),
+        None,
+    ),
+    (
+        datetime.datetime(2024, 9, 6, 15, 24, 3),
+        77282,
+        "CPM",
+        "every minute",
+        datetime.datetime(2024, 9, 6, 15, 22, 3),
+        None,
+    ),
+    (
+        datetime.datetime(2024, 9, 6, 15, 25, 3),
+        20000000,
+        "CPM",
+        "every minute",
+        datetime.datetime(2024, 9, 6, 15, 22, 3),
+        None,
     ),
 ]

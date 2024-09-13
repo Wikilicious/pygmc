@@ -1,3 +1,4 @@
+import datetime
 import pygmc
 
 from .data import data_history_parser
@@ -28,3 +29,20 @@ def test_history_parser_count_same_as_cmd():
     tidy_data = h.get_data()
     assert tidy_data[0][1] == 85
     assert tidy_data[1][1] == 18
+
+
+def test_tube_selection():
+    # purposefully as arg instead of kwarg
+    h = pygmc.HistoryParser(data_history_parser.raw_history_tube_selection)
+    assert h.get_data() == data_history_parser.raw_history_tube_selection_tidy
+
+
+def test_three_byte_count():
+    h = pygmc.HistoryParser(data_history_parser.raw_history_3byte_count)
+    assert h.get_data() == data_history_parser.raw_history_3byte_count_tidy
+
+
+def test_four_byte_count():
+    # fake/synthetic data - not validated because I don't have a source to do so
+    h = pygmc.HistoryParser(data_history_parser.raw_history_4byte_count)
+    assert h.get_data() == data_history_parser.raw_history_4byte_count_tidy

@@ -58,13 +58,17 @@ class HistoryParser:
         self._parse()
 
     def _get_count_data(self, com_str):
-        if len(com_str) > 4:
-            # Not sure what my thinking was here... remove?
-            return None
         if len(com_str) == 1:
             value = struct.unpack(">B", com_str)[0]
         elif len(com_str) == 2:
             value = struct.unpack(">H", com_str)[0]
+        elif len(com_str) == 3:
+            # 3 byte data... 2**24 = 16,777,216 max
+            value = int.from_bytes(com_str, "big")
+            # value = struct.unpack(">I", com_str)[0]
+        elif len(com_str) == 4:
+            # 4 byte data... really?! Ok, sure
+            value = int.from_bytes(com_str, "big")
         else:
             msg = "Unexpected len for count data: len={}".format(len(com_str))
             raise ValueError(msg)
@@ -209,7 +213,6 @@ class HistoryParser:
                             # two byte count number
                             # so... max CPM is 65,535?
                             data = self._raw.read(2)
-                            self.example = data
                             n = self._get_count_data(data)
                             self._add_to_df(n)
                         # 0x02 (2)
@@ -220,10 +223,35 @@ class HistoryParser:
                             size = ord(data)
                             notes = self._raw.read(size)
                             self._add_notes(notes)
+                        elif com3 == 3:
+                            # three byte count number
+                            # max CPM 16,777,216 (including 0) 2^24
+                            data = self._raw.read(3)
+                            n = self._get_count_data(data)
+                            self._add_to_df(n)
+                        elif com3 == 4:
+                            # four byte count number? 2^32
+                            # The last number you'll see! Guaranteed!
+                            data = self._raw.read(4)
+                            n = self._get_count_data(data)
+                            self._add_to_df(n)
+                        elif com3 == 5:
+                            # tube selection: 0=both
+                            tube = self._raw.read(1)
+                            # My GMC-500+ had instances where it failed to record tube
+                            if tube == b"U":
+                                # An unknown bug... start of cmd w/o tube specified
+                                # was expecting \x00 (both) or 1 or 2
+                                i = self._raw.tell()  # current read position
+                                self._raw.seek(i - 1)  # go back one byte
+                                # have to read more than 1 byte to get here i.e. not neg
+                            # perhaps add tube selection as column?
                         else:
                             # Whoa! You just hit a rare event
-                            # Counts: 85 then 170 then not 0 nor 1 nor 2.
-                            # Treat them as counts
+                            # Counts: 85 then 170 then not 0, 1, 2, 3, 4, 5
+                            # Though a low number here would be a suspicious undocumented
+                            # feature/cmd... let's still treat them as counts to raise
+                            # the attention of a user to file an issue.
                             n = self._get_count_data(com_str)
                             self._add_to_df(n)
                             n = self._get_count_data(com_str2)
@@ -274,3 +302,33 @@ class _BinFile:
 
     def close(self):
         pass
+
+    def tell(self):
+        """Return current stream position."""
+        return self._i
+
+    def seek(self, i):
+        """
+        Change stream position.
+
+        Change the stream position to the given byte offset. The offset is
+        interpreted relative to the position indicated by whence.  Values
+        for whence are:
+
+        * 0 -- start of stream (the default); offset should be zero or positive
+        * 1 -- current stream position; offset may be negative
+        * 2 -- end of stream; offset is usually negative
+
+        Return the new absolute position.
+
+        Parameters
+        ----------
+        i int
+            Position to offset to.
+
+        Returns
+        -------
+
+        """
+        self._i = i
+        return self._i
