@@ -20,6 +20,7 @@ from pygmc.devices import (
     GMC300,
     GMC300S,
     GMC320,
+    GMC320S,
     GMC500,
     GMC600,
     GMC800,

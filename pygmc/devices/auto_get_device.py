@@ -5,7 +5,7 @@ from .device_rfc1201 import DeviceRFC1201
 from .device_rfc1801 import DeviceRFC1801
 from .device_spec404 import DeviceSpec404
 from .gmc300 import GMC300, GMC300S, GMC300EPlus
-from .gmc320 import GMC320, GMC320Plus, GMC320PlusV5
+from .gmc320 import GMC320, GMC320Plus, GMC320S,  GMC320PlusV5
 from .gmc500 import GMC500, GMC500Plus
 from .gmc600 import GMC600, GMC600Plus
 from .gmc800 import GMC800
@@ -55,6 +55,12 @@ device_match_list = [
         # For sake of passing unittests (and hoping a newer rev adds the '+')
         # Faking version below from "GMC-320Re 4.26" --> "GMC-320+Re 4.26"
         "version_example": "GMC-320+Re 4.26",
+    },
+    {
+        "match_regex": r"GMC-320S",
+        "device_class": GMC320S,
+        "protocol_class": DeviceRFC1201,
+        "version_example": "GMC-320SRe 1.15",
     },
     {
         "match_regex": r"GMC-320",
