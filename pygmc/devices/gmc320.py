@@ -38,6 +38,7 @@ class GMC320(DeviceRFC1201):
         else:
             raise ConnectionError(f"Unable to connect port={port} baudrate={baudrate}")
 
+
 class GMC320S(DeviceRFC1201):
     """GMC-320S"""
 
