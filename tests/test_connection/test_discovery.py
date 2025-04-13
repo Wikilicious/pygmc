@@ -11,6 +11,7 @@ version_to_model_rev_test_cases = [
     ("GMC-320Re 4.26", "GMC-320", "4.26"),
     ("GMC-300SRe 1.14", "GMC-300S", "1.14"),
     ("GMC-SE Re 1.05", "GMC-SE", "1.05"),
+    ("GMC-320SRe 1.15", "GMC-320S", "1.15"),  # thanks @ffries
     # Fake test cases below
     ("", "", ""),  # GRC - non-match returns empty model & revision
     ("GMC 404 Re1.23A", "GMC 404", "1.23A"),  # test space in model

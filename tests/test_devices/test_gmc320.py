@@ -9,12 +9,17 @@ from ..mocks import MockConnection
 
 actions_conn = MockConnection(data_gmc320.actions_cmd_response_map)
 gc320 = pygmc.GMC320(port=None, baudrate=123, connection=actions_conn)
+gc320s = pygmc.GMC320S(port=None, baudrate=123, connection=actions_conn)
 gc320plus = pygmc.GMC320Plus(port=None, baudrate=123, connection=actions_conn)
+gc320plus_v5 = pygmc.GMC320PlusV5(port=None, baudrate=123, connection=actions_conn)
 
 
-# Do both GMC500 and GMC500+ together
 parametrize_data = [(gc320, x) for x in data_gmc320.actions_device_test_cases]
+parametrize_data.extend([(gc320s, x) for x in data_gmc320.actions_device_test_cases])
 parametrize_data.extend([(gc320plus, x) for x in data_gmc320.actions_device_test_cases])
+parametrize_data.extend(
+    [(gc320plus_v5, x) for x in data_gmc320.actions_device_test_cases]
+)
 
 
 @pytest.mark.parametrize("gc,case", parametrize_data)
