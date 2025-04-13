@@ -138,6 +138,7 @@ parametrize_device_conns = [
     pygmc.GMC300S,
     pygmc.GMC300EPlus,
     pygmc.GMC320,
+    pygmc.GMC320S,
     pygmc.GMC320Plus,
     pygmc.GMC320PlusV5,
     pygmc.GMC500,
