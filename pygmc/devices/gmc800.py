@@ -41,3 +41,5 @@ class GMC800(DeviceSpec404):
         # listed as RFC1201 in https://www.gqelectronicsllc.com/GMC-800UserGuide.pdf
         # https://www.gqelectronicsllc.com/forum/topic.asp?TOPIC_ID=10394
         # The device uses a non-published spec.
+
+        self._flash_memory_size_bytes = 2**21  # 2 MiB

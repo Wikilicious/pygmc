@@ -70,6 +70,7 @@ mock_connection = MockConnection(cmd_response_map)
 
 # Use our fake/mock connection in our real device class
 mock_device = devices.DeviceSpec404(mock_connection)
+mock_gmc800 = devices.GMC800(port=None, connection=mock_connection)
 
 
 @pytest.mark.parametrize("cmd,expected", parametrize_data)
@@ -96,6 +97,10 @@ def test_reset_buffers(capfd):
     mock_device.get_config()
     out, err = capfd.readouterr()
     assert "reset_buffers" in out
+
+
+def test_gmc800_flash_memory_size():
+    assert mock_gmc800._flash_memory_size_bytes == 2**21
 
 
 # uSv Tests
