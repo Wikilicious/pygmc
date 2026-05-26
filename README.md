@@ -96,6 +96,7 @@ df = pd.DataFrame(history[1:], columns=history[0])
 
 - [Thomaz](https://github.com/Wikilicious)
 - [Huy](https://github.com/huyndao)
+- [Anatoly Scherbakov](https://github.com/anatoly-scherbakov)
 
 ### Notes
 - Alternative Python projects for GQ GMC:
