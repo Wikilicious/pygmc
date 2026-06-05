@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.14.2 (2024-06-04)
+- [BUG] Fix GMC-800 history flash size #134 @anatoly-scherbakov 
+- Added Python 3.13 & 3.14 (pi) as supported version on PyPi
+
 ## 0.14.1 (2024-09-12)
 - Added model & firmware revision (from device version) to device Discovery
 - [BUG] History Parser can now handle 3 and 4 byte counts.
